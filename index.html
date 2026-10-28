@@ -16,14 +16,11 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
-        
-        /* Banda decorativa superiore sfumata per Dynamic Island / Status Bar */
         .header-safe-strip {
             height: max(env(safe-area-inset-top, 50px), 60px);
             background: linear-gradient(135deg, #101226 0%, #1a1c2e 40%, #312e81 80%, #6366f1 100%);
             border-bottom: 1px solid rgba(165, 180, 252, 0.2);
         }
-
         .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px); }
         .card-pop { transition: transform 0.2s ease; }
         .card-pop:active { transform: scale(0.98); }
@@ -34,11 +31,9 @@
 </head>
 <body class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <!-- Banda Sfumata di Protezione (Blu Scuro -> Glicine/Indaco) per la Dynamic Island -->
     <div class="header-safe-strip w-full sticky top-0 z-40 shadow-lg"></div>
 
     <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full">
-        <!-- Header dell'App -->
         <div class="flex justify-between items-center mb-8 pt-2">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
@@ -76,7 +71,6 @@
         </div>
 
         <main class="space-y-8">
-            <!-- Greeting Section -->
             <div class="space-y-4">
                 <h2 id="greeting" class="text-4xl md:text-6xl font-extrabold tracking-tight">Caricamento...</h2>
                 <div class="flex items-center gap-2 text-lg font-medium opacity-80">
@@ -86,33 +80,25 @@
                 <p id="statusLine" class="hidden text-sm opacity-60"></p>
             </div>
 
-            <!-- Card di errore/stato -->
             <div id="statusCard" class="hidden"></div>
 
-            <!-- TODAY'S FOCUS SECTION -->
             <div id="todayFocus" class="space-y-4">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="h-1 w-8 bg-indigo-500 rounded-full"></div>
                     <span class="text-sm font-bold uppercase tracking-widest text-indigo-400">Appuntamenti di Oggi</span>
                 </div>
-                <div id="todayEventsList" class="grid grid-cols-1 gap-3">
-                    <!-- Eventi di oggi -->
-                </div>
+                <div id="todayEventsList" class="grid grid-cols-1 gap-3"></div>
             </div>
 
-            <!-- NEXT DAYS (PROSSIMI 6 GIORNI) -->
             <div class="space-y-4">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="h-1 w-8 bg-slate-500 rounded-full"></div>
                     <span class="text-sm font-bold uppercase tracking-widest opacity-60">Prossimi 6 Giorni</span>
                 </div>
-                <div id="calendarGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Generati da JS (escludendo oggi) -->
-                </div>
+                <div id="calendarGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
         </main>
 
-        <!-- List Overlay / Modal con inserimento attivo -->
         <div id="listOverlay" class="fixed inset-0 z-[100] hidden flex items-end md:items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <div id="listCard" class="w-full max-w-lg rounded-t-3xl md:rounded-3xl overflow-hidden bg-[#25284d] border border-[#3a3f7a] shadow-2xl animate-slide-up">
                 <div class="p-5 flex justify-between items-center border-b border-slate-700/50">
@@ -126,17 +112,12 @@
                 </div>
                 
                 <div class="p-6 space-y-4">
-                    <!-- Elementi della lista -->
-                    <div id="listItems" class="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
-                        <!-- Generati dinamicamente -->
-                    </div>
-
-                    <!-- Input per aggiungere elementi -->
+                    <div id="listItems" class="space-y-2 max-h-[50vh] overflow-y-auto pr-1"></div>
                     <div class="flex gap-2 pt-2">
                         <input type="text" id="newItemInput" placeholder="Aggiungi una voce..." 
                             class="flex-1 bg-slate-800/80 border border-slate-600/60 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-white placeholder-slate-400"
-                            onkeypress="if(event.key==='Enter') addItemFromInput()">
-                        <button onclick="addItemFromInput()" class="px-5 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-500 transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/30">
+                            onkeypress="if(event.key==='Enter') addItemToCloud()">
+                        <button onclick="addItemToCloud()" class="px-5 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-500 transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/30">
                             <i data-lucide="plus" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -156,16 +137,10 @@
 
         let isDark = true;
         let weekData = null;
+        let sharedLists = { todo: [], shopping: [], notes: [] };
         let loadState = "loading";
         let loading = false;
         let currentListType = "todo";
-
-        // Gestione Liste locali
-        let userLists = {
-            todo: JSON.parse(localStorage.getItem("gas_list_todo") || "[]"),
-            shopping: JSON.parse(localStorage.getItem("gas_list_shopping") || "[]"),
-            notes: JSON.parse(localStorage.getItem("gas_list_notes") || "[]")
-        };
 
         const badgeColors = [
             "bg-rose-500 text-white", "bg-amber-500 text-white", "bg-emerald-500 text-white",
@@ -237,7 +212,6 @@
             chevron.classList.toggle("rotate-90");
         }
 
-        /* ───────── Gestione Liste Inseribili ───────── */
         function openList(type) {
             currentListType = type;
             const overlay = document.getElementById("listOverlay");
@@ -266,22 +240,22 @@
 
         function renderListItems() {
             const container = document.getElementById("listItems");
-            const list = userLists[currentListType] || [];
+            const list = sharedLists[currentListType] || [];
             container.innerHTML = "";
 
             if (list.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-slate-400 text-sm italic">Nessun elemento in questa lista.<br>Scrivi sotto per aggiungerne uno!</div>`;
+                container.innerHTML = `<div class="p-6 text-center text-slate-400 text-sm italic">Nessun elemento sincronizzato.<br>Scrivi sotto per aggiungerne uno visibile a tutti!</div>`;
                 return;
             }
 
-            list.forEach((item, index) => {
+            list.forEach((item) => {
                 container.innerHTML += `
                     <div class="flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-slate-800/60' : 'bg-slate-100'} group">
-                        <div class="flex items-center gap-3 flex-1 overflow-hidden cursor-pointer" onclick="toggleItemDone(${index})">
-                            <i data-lucide="${item.done ? 'check-circle' : 'circle'}" class="w-5 h-5 ${item.done ? 'text-emerald-500' : 'text-slate-400'}"></i>
-                            <span class="text-sm flex-1 ${item.done ? 'line-through opacity-40' : ''}">${esc(item.text)}</span>
+                        <div class="flex items-center gap-3 flex-1 overflow-hidden">
+                            <i data-lucide="circle" class="w-5 h-5 text-indigo-400"></i>
+                            <span class="text-sm flex-1">${esc(item.text)}</span>
                         </div>
-                        <button onclick="deleteListItem(${index})" class="text-slate-500 hover:text-rose-400 p-1">
+                        <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors" title="Elimina">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>`;
@@ -289,30 +263,43 @@
             lucide.createIcons();
         }
 
-        function addItemFromInput() {
+        async function addItemToCloud() {
             const input = document.getElementById("newItemInput");
             const text = input.value.trim();
             if (!text) return;
 
-            userLists[currentListType].push({ text: text, done: false });
-            localStorage.setItem(`gas_list_${currentListType}`, JSON.stringify(userLists[currentListType]));
-            input.value = "";
-            renderListItems();
+            input.disabled = true;
+            try {
+                const res = await fetch(`${WORKER_URL}?action=addItem`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title: text, listType: currentListType })
+                });
+                if (!res.ok) throw new Error("Errore salvataggio");
+                input.value = "";
+                await loadWeek(); // Ricarica i dati aggiornati dal Cloud
+                renderListItems();
+            } catch (err) {
+                alert("Impossibile aggiungere l'elemento. Verifica la connessione.");
+            } finally {
+                input.disabled = false;
+                input.focus();
+            }
         }
 
-        function toggleItemDone(index) {
-            userLists[currentListType][index].done = !userLists[currentListType][index].done;
-            localStorage.setItem(`gas_list_${currentListType}`, JSON.stringify(userLists[currentListType]));
-            renderListItems();
+        async function deleteItemFromCloud(eventId) {
+            try {
+                const res = await fetch(`${WORKER_URL}?action=deleteItem&id=${eventId}`, {
+                    method: "DELETE"
+                });
+                if (!res.ok) throw new Error("Errore eliminazione");
+                await loadWeek(); // Ricarica i dati aggiornati dal Cloud
+                renderListItems();
+            } catch (err) {
+                alert("Impossibile eliminare l'elemento.");
+            }
         }
 
-        function deleteListItem(index) {
-            userLists[currentListType].splice(index, 1);
-            localStorage.setItem(`gas_list_${currentListType}`, JSON.stringify(userLists[currentListType]));
-            renderListItems();
-        }
-
-        /* ───────── Dati Calendario ───────── */
         function readCache() {
             try {
                 const data = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
@@ -338,6 +325,7 @@
                 const data = await res.json();
                 if (!data || !Array.isArray(data.days)) throw new Error("risposta non valida");
                 weekData = data;
+                if (data.lists) sharedLists = data.lists;
                 loadState = "ok";
                 try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) {}
             } catch (e) {
@@ -346,6 +334,9 @@
                 loading = false;
                 setSpinning(false);
                 renderAll();
+                if (!document.getElementById("listOverlay").classList.contains("hidden")) {
+                    renderListItems();
+                }
             }
         }
 
@@ -391,7 +382,6 @@
             const days = weekData.days;
             const todayData = days.find(d => d.date === today) || { events: [] };
 
-            // 1. Appuntamenti di Oggi
             if (todayData.events.length > 0) {
                 todayData.events.forEach(e => {
                     const isPast = !e.allDay && e.startMs < nowMs;
@@ -416,7 +406,6 @@
                 todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic">Nessun appuntamento per oggi. Relax! ✨</div>';
             }
 
-            // 2. Prossimi 6 Giorni (Escludendo la giornata odierna)
             const nextDays = days.filter(d => d.date !== today);
 
             nextDays.forEach((day, i) => {
