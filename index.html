@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="GasCalendar">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1c2e">
+    <title>GasCalendar Focus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
+        .safe-top { padding-top: env(safe-area-inset-top, 0px); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+        .card-pop { transition: transform 0.2s ease; }
+        .card-pop:active { transform: scale(0.98); }
+        .animate-slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .check-done { color: #10b981; }
+        @media (prefers-reduced-motion: reduce) { .animate-slide-up { animation: none; } }
+    </style>
+</head>
+<body class="bg-[#1a1c2e] text-white">
+    <div class="min-h-screen p-4 md:p-8 safe-top safe-bottom">
+        <!-- Header -->
+        <div class="max-w-4xl mx-auto flex justify-between items-center mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i data-lucide="calendar" class="text-white w-6 h-6"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">GasCalendar <span class="text-indigo-500">Focus</span></h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="refreshBtn" aria-label="Aggiorna" class="p-2 rounded-full bg-slate-700 text-slate-200">
+                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                </button>
+                <button id="themeToggle" aria-label="Cambia tema" class="p-2 rounded-full bg-slate-700 text-amber-400">
+                    <i data-lucide="sun" class="w-5 h-5"></i>
+                </button>
+                <div class="relative">
+                    <button id="listBtn" class="flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all bg-slate-700 text-slate-200">
+                        <i data-lucide="list-todo" class="w-4 h-4"></i>
+                        <span id="listLabel">Liste</span>
+                        <i data-lucide="chevron-right" class="w-4 h-4 transition-transform" id="chevron"></i>
+                    </button>
+                    <div id="listMenu" class="hidden absolute right-0 mt-2 w-48 rounded-2xl p-2 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a]">
+                        <button onclick="openList('todo')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors text-left hover:bg-slate-600 text-slate-300">
+                            <i data-lucide="list-todo" class="w-4 h-4"></i> Cose da fare
+                        </button>
+                        <button onclick="openList('shopping')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors text-left hover:bg-slate-600 text-slate-300">
+                            <i data-lucide="shopping-cart" class="w-4 h-4"></i> Lista Spesa
+                        </button>
+                        <button onclick="openList('notes')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors text-left hover:bg-slate-600 text-slate-300">
+                            <i data-lucide="sticky-note" class="w-4 h-4"></i> Note Rapide
+                        </button>
+                        <button onclick="toggleMenu()" class="w-full text-center mt-2 py-1 text-xs text-slate-500 hover:text-indigo-500 transition-colors">Chiudi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main class="max-w-4xl mx-auto space-y-8">
+            <!-- Greeting Section -->
+            <div class="space-y-4">
+                <h2 id="greeting" class="text-4xl md:text-6xl font-extrabold tracking-tight">Caricamento...</h2>
+                <div class="flex items-center gap-2 text-lg font-medium opacity-80">
+                    <i data-lucide="calendar" class="text-indigo-500 w-5 h-5"></i>
+                    <span id="currentDate"></span>
+                </div>
+                <p id="statusLine" class="hidden text-sm opacity-60"></p>
+            </div>
+
+            <!-- Messaggi di stato (configurazione / errore) -->
+            <div id="statusCard" class="hidden"></div>
+
+            <!-- TODAY'S FOCUS SECTION -->
+            <div id="todayFocus" class="space-y-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="h-1 w-8 bg-indigo-500 rounded-full"></div>
+                    <span class="text-sm font-bold uppercase tracking-widest text-indigo-400">Appuntamenti di Oggi</span>
+                </div>
+                <div id="todayEventsList" class="grid grid-cols-1 gap-3">
+                    <!-- Today's events injected here -->
+                </div>
+            </div>
+
+            <!-- 7-Day Grid -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="h-1 w-8 bg-slate-500 rounded-full"></div>
+                    <span class="text-sm font-bold uppercase tracking-widest opacity-50">Prossimi 7 Giorni</span>
+                </div>
+                <div id="calendarGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+        </main>
+
+        <!-- List Overlay -->
+        <div id="listOverlay" class="fixed inset-0 z-[100] hidden flex items-end md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div id="listCard" class="w-full max-w-lg rounded-t-3xl md:rounded-3xl overflow-hidden bg-[#25284d] border border-[#3a3f7a] shadow-2xl animate-slide-up">
+                <div class="p-6 flex justify-between items-center border-b border-slate-700/20">
+                    <div class="flex items-center gap-3">
+                        <div id="listIconBox" class="p-2 bg-indigo-600 rounded-lg text-white"></div>
+                        <h3 id="listTitle" class="text-xl font-bold capitalize">Lista</h3>
+                    </div>
+                    <button onclick="closeList()" class="p-2 hover:bg-slate-500/20 rounded-full transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="p-6 max-h-[70vh] overflow-y-auto">
+                    <div id="listItems" class="space-y-4">
+                        <!-- Items here -->
+                    </div>
+                    <button class="w-full mt-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20">
+                        + Aggiungi nuovo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ───────── CONFIGURAZIONE ─────────
+           1) Metti qui l'indirizzo del tuo Worker (lo vedi dopo il deploy su Cloudflare).
+           2) Se nel Worker hai impostato APP_TOKEN, scrivi la stessa parola in WORKER_KEY. */
+        const WORKER_URL = "https://gascalfocus.allarme-miacasa.workers.dev//";
+        const WORKER_KEY = "";
+
+        const TZ = "Europe/Rome";           // tutti gli orari seguono Roma: ora legale/solare automatica
+        const CACHE_KEY = "gascalendar:ultimo-aggiornamento";
+        const REFRESH_MS = 5 * 60 * 1000;   // ricarica dati ogni 5 minuti
+        const TICK_MS = 60 * 1000;          // aggiorna saluto e spunte ogni minuto
+
+        let isDark = true;
+        let weekData = null;                // { days: [{date, events: [...]}], generatedAt }
+        let loadState = "loading";          // loading | ok | stale | error | setup
+        let loading = false;
+
+        const badgeColors = [
+            "bg-rose-500 text-white", "bg-amber-500 text-white", "bg-emerald-500 text-white",
+            "bg-sky-500 text-white", "bg-indigo-500 text-white", "bg-violet-500 text-white", "bg-fuchsia-500 text-white"
+        ];
+
+        /* ───────── Utilità ───────── */
+        function esc(s) {
+            return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        }
+
+        // Data di oggi a Roma nel formato YYYY-MM-DD
+        function romeToday() {
+            return new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+        }
+
+        function romeHour(now) {
+            return Number(new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", hourCycle: "h23" }).format(now)) % 24;
+        }
+
+        function romeTime(ms) {
+            return new Intl.DateTimeFormat("it-IT", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(ms));
+        }
+
+        function dayDiff(fromIso, toIso) {
+            return Math.round((Date.parse(toIso + "T00:00:00Z") - Date.parse(fromIso + "T00:00:00Z")) / 86400000);
+        }
+
+        function isoToDate(iso) { return new Date(iso + "T12:00:00Z"); } // da formattare con timeZone "UTC"
+
+        /* ───────── Saluto ───────── */
+        function updateGreeting() {
+            const now = new Date();
+            const hour = romeHour(now);
+            let greet = "Buona notte!";
+            if (hour >= 5 && hour < 11) greet = "Buongiorno!";
+            else if (hour >= 11 && hour < 14) greet = "Buon pranzo!";
+            else if (hour >= 14 && hour < 17) greet = "Buon pomeriggio!";
+            else if (hour >= 17 && hour < 19) greet = "Buon caffè!";
+            else if (hour >= 19 && hour < 21) greet = "Buona cena!";
+            else if (hour >= 21 && hour < 23) greet = "Buona serata!";
+
+            document.getElementById("greeting").innerText = greet;
+            document.getElementById("currentDate").innerText =
+                now.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: TZ });
+        }
+
+        /* ───────── Tema e menu ───────── */
+        function toggleTheme() {
+            isDark = !isDark;
+            const body = document.body;
+            const btn = document.getElementById("themeToggle");
+            const refresh = document.getElementById("refreshBtn");
+            if (isDark) {
+                body.className = "bg-[#1a1c2e] text-white";
+                btn.className = "p-2 rounded-full bg-slate-700 text-amber-400";
+                refresh.className = "p-2 rounded-full bg-slate-700 text-slate-200";
+                btn.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
+            } else {
+                body.className = "bg-slate-50 text-slate-900";
+                btn.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm";
+                refresh.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm";
+                btn.innerHTML = '<i data-lucide="moon" class="w-5 h-5"></i>';
+            }
+            lucide.createIcons();
+            renderAll();
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById("listMenu");
+            const chevron = document.getElementById("chevron");
+            menu.classList.toggle("hidden");
+            chevron.classList.toggle("rotate-90");
+        }
+
+        function openList(type) {
+            const overlay = document.getElementById("listOverlay");
+            const title = document.getElementById("listTitle");
+            const iconBox = document.getElementById("listIconBox");
+            const items = document.getElementById("listItems");
+
+            let label = "Lista";
+            let icon = "list-todo";
+
+            if (type === "todo") { label = "Cose da Fare"; icon = "list-todo"; }
+            else if (type === "shopping") { label = "Lista Spesa"; icon = "shopping-cart"; }
+            else if (type === "notes") { label = "Note Rapide"; icon = "sticky-note"; }
+
+            title.innerText = label;
+            iconBox.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i>`;
+
+            items.innerHTML = "";
+            for (let i = 0; i < 5; i++) {
+                items.innerHTML += `
+                    <div class="flex items-center gap-3 p-3 border-b border-slate-500/10 group">
+                        <i data-lucide="circle" class="w-4 h-4 text-slate-400 group-hover:text-indigo-500"></i>
+                        <span class="flex-1 opacity-80 italic text-sm">Aggiungi un elemento...</span>
+                    </div>`;
+            }
+
+            overlay.classList.remove("hidden");
+            lucide.createIcons();
+            toggleMenu();
+        }
+
+        function closeList() {
+            document.getElementById("listOverlay").classList.add("hidden");
+        }
+
+        /* ───────── Dati reali dal Worker ───────── */
+        function readCache() {
+            try {
+                const data = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
+                // si usa solo se il primo giorno è ancora oggi (a Roma)
+                if (data && data.days && data.days[0] && data.days[0].date === romeToday()) return data;
+            } catch (e) {}
+            return null;
+        }
+
+        function setSpinning(on) {
+            const icon = document.querySelector("#refreshBtn svg");
+            if (icon) icon.classList.toggle("animate-spin", on);
+        }
+
+        async function loadWeek() {
+            if (WORKER_URL.includes("TUO-SUBDOMINIO")) {
+                loadState = "setup";
+                renderAll();
+                return;
+            }
+            if (loading) return;
+            loading = true;
+            setSpinning(true);
+            try {
+                const url = new URL(WORKER_URL);
+                if (WORKER_KEY) url.searchParams.set("k", WORKER_KEY);
+                const res = await fetch(url.toString(), { cache: "no-store" });
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const data = await res.json();
+                if (!data || !Array.isArray(data.days)) throw new Error("risposta non valida");
+                weekData = data;
+                loadState = "ok";
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+            } catch (e) {
+                loadState = weekData ? "stale" : "error";
+            } finally {
+                loading = false;
+                setSpinning(false);
+                renderAll();
+            }
+        }
+
+        /* ───────── Rendering ───────── */
+        function renderStatus() {
+            const card = document.getElementById("statusCard");
+            const line = document.getElementById("statusLine");
+            const box = isDark ? "bg-[#25284d] border-[#3a3f7a]" : "bg-white border-slate-200";
+            line.classList.add("hidden");
+            card.classList.add("hidden");
+            card.innerHTML = "";
+
+            if (loadState === "setup") {
+                card.className = `p-5 rounded-3xl border-2 ${box}`;
+                card.innerHTML = `
+                    <p class="font-bold text-lg mb-1">Manca un ultimo passo</p>
+                    <p class="text-sm opacity-70">Apri questo file e scrivi l'indirizzo del Worker in <code>WORKER_URL</code> (e la parola d'ordine in <code>WORKER_KEY</code>, se l'hai impostata).</p>`;
+            } else if (loadState === "error") {
+                card.className = `p-5 rounded-3xl border-2 ${box}`;
+                card.innerHTML = `
+                    <p class="font-bold text-lg mb-1">Non riesco a leggere il calendario</p>
+                    <p class="text-sm opacity-70 mb-3">Controlla la connessione e riprova. Se succede ancora, verifica l'indirizzo del Worker.</p>
+                    <button onclick="loadWeek()" class="px-4 py-2 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-500 transition-all">Riprova</button>`;
+            } else if (loadState === "stale" && weekData) {
+                line.textContent = `Senza connessione: mostro i dati delle ${romeTime(weekData.generatedAt)}.`;
+                line.classList.remove("hidden");
+                card.className = "hidden";
+                return;
+            }
+            if (loadState === "setup" || loadState === "error") card.classList.remove("hidden");
+        }
+
+        function renderAll() {
+            renderStatus();
+
+            const todayList = document.getElementById("todayEventsList");
+            const grid = document.getElementById("calendarGrid");
+            todayList.innerHTML = "";
+            grid.innerHTML = "";
+
+            if (!weekData) {
+                if (loadState === "loading") {
+                    todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic">Carico il calendario…</div>';
+                }
+                lucide.createIcons();
+                return;
+            }
+
+            const nowMs = Date.now();
+            const today = romeToday();
+            const days = weekData.days;
+            const todayData = days.find(d => d.date === today) || { events: [] };
+
+            // 1. Focus Oggi
+            if (todayData.events.length > 0) {
+                todayData.events.forEach(e => {
+                    const isPast = !e.allDay && e.startMs < nowMs;
+                    const timeLabel = e.allDay
+                        ? '<div class="text-indigo-500 font-bold text-sm w-16 leading-tight">Tutto il giorno</div>'
+                        : `<div class="text-indigo-500 font-bold text-lg w-16">${esc(e.time)}</div>`;
+                    const where = e.location ? `<p class="text-xs opacity-60 truncate">${esc(e.location)}</p>` : "";
+
+                    todayList.innerHTML += `
+                        <div class="flex items-center gap-4 p-4 rounded-3xl border-2 ${isDark ? "bg-[#25284d] border-[#3a3f7a]" : "bg-white border-slate-200"} shadow-md">
+                            ${timeLabel}
+                            <div class="flex-1 overflow-hidden">
+                                <p class="font-semibold text-lg">${esc(e.title)}</p>
+                                ${where}
+                            </div>
+                            <button class="${isPast ? "text-emerald-500" : "text-slate-500"} transition-colors" aria-label="${isPast ? "Fatto" : "Da fare"}">
+                                <i data-lucide="${isPast ? "check-circle" : "circle"}" class="w-7 h-7"></i>
+                            </button>
+                        </div>`;
+                });
+            } else {
+                todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic">Nessun appuntamento per oggi. Relax! ✨</div>';
+            }
+
+            // 2. Vista 7 giorni
+            days.forEach((day, i) => {
+                const date = isoToDate(day.date);
+                const dayNum = date.getUTCDate();
+                const dayName = date.toLocaleDateString("it-IT", { weekday: "short", timeZone: "UTC" }).toUpperCase();
+                const fullDayName = date.toLocaleDateString("it-IT", { weekday: "long", timeZone: "UTC" });
+                const diff = dayDiff(today, day.date);
+                const isToday = diff === 0;
+                const relLabel = isToday ? "Oggi" : diff === 1 ? "Domani" : diff > 1 ? `Tra ${diff} giorni` : "Passato";
+                const count = day.events.length;
+                const countLabel = count === 1 ? "1 impegno" : `${count} impegni`;
+
+                const cardBg = isDark
+                    ? (isToday ? "bg-[#2d3163] border-indigo-400 ring-4 ring-indigo-500/10" : "bg-[#25284d] border-[#3a3f7a]")
+                    : (isToday ? "bg-white border-indigo-200 ring-4 ring-indigo-100" : "bg-white border-slate-200");
+
+                const eventsHtml = count > 0
+                    ? day.events.map(e => `
+                        <div class="group flex items-center gap-3 p-3 rounded-2xl transition-all ${isDark ? "hover:bg-slate-700/50" : "hover:bg-slate-100"}">
+                            <i data-lucide="circle" class="w-5 h-5 text-indigo-500"></i>
+                            <div class="flex-1 overflow-hidden">
+                                <p class="text-sm font-semibold truncate">${esc(e.title)}</p>
+                                <p class="text-xs opacity-60">${e.allDay ? "Tutto il giorno" : esc(e.time)}</p>
+                            </div>
+                        </div>`).join("")
+                    : '<div class="py-4 text-center opacity-40 italic text-sm">Giornata libera ✨</div>';
+
+                grid.innerHTML += `
+                    <div class="p-5 rounded-3xl border transition-all card-pop ${cardBg}">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-bold shadow-lg ${badgeColors[i % badgeColors.length]}">
+                                    <span class="text-xs uppercase leading-none">${esc(dayName)}</span>
+                                    <span class="text-lg leading-none">${dayNum}</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg capitalize">${esc(fullDayName)}</h4>
+                                    <span class="text-xs opacity-60">${relLabel} • ${countLabel}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">${eventsHtml}</div>
+                    </div>`;
+            });
+
+            lucide.createIcons();
+        }
+
+        /* ───────── Avvio e aggiornamenti ───────── */
+        function tick() {
+            updateGreeting();
+            // a mezzanotte (ora di Roma) la finestra dei 7 giorni va ricaricata
+            if (weekData && weekData.days[0].date !== romeToday()) {
+                loadWeek();
+            } else {
+                renderAll();
+            }
+        }
+
+        document.getElementById("themeToggle").onclick = toggleTheme;
+        document.getElementById("listBtn").onclick = toggleMenu;
+        document.getElementById("refreshBtn").onclick = loadWeek;
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") { updateGreeting(); loadWeek(); }
+        });
+
+        updateGreeting();
+        const cached = readCache();
+        if (cached) weekData = cached;      // mostra subito l'ultimo aggiornamento mentre carica
+        renderAll();
+        lucide.createIcons();
+        loadWeek();
+        setInterval(tick, TICK_MS);
+        setInterval(loadWeek, REFRESH_MS);
+    </script>
+</body>
+</html>
