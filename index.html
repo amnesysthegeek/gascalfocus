@@ -16,8 +16,9 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
-        .safe-top { padding-top: max(env(safe-area-inset-top, 20px), 24px); }
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+        /* Margine superiore aumentato per sicurezza sotto la Dynamic Island */
+        .safe-top { padding-top: max(env(safe-area-inset-top, 36px), 44px); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 20px); }
         .card-pop { transition: transform 0.2s ease; }
         .card-pop:active { transform: scale(0.98); }
         .animate-slide-up { animation: slideUp 0.3s ease-out; }
@@ -127,20 +128,17 @@
     </div>
 
     <script>
-        /* ───────── CONFIGURAZIONE ─────────
-           1) Metti qui l'indirizzo del tuo Worker (lo vedi dopo il deploy su Cloudflare).
-           2) Se nel Worker hai impostato APP_TOKEN, scrivi la stessa parola in WORKER_KEY. */
-        const WORKER_URL = "https://gascalfocus.allarme-miacasa.workers.dev//";
+        const WORKER_URL = "https://gascalfocus.allarme-miacasa.workers.dev/";
         const WORKER_KEY = "";
 
-        const TZ = "Europe/Rome";           // tutti gli orari seguono Roma: ora legale/solare automatica
+        const TZ = "Europe/Rome";
         const CACHE_KEY = "gascalendar:ultimo-aggiornamento";
-        const REFRESH_MS = 5 * 60 * 1000;   // ricarica dati ogni 5 minuti
-        const TICK_MS = 60 * 1000;          // aggiorna saluto e spunte ogni minuto
+        const REFRESH_MS = 5 * 60 * 1000;
+        const TICK_MS = 60 * 1000;
 
         let isDark = true;
-        let weekData = null;                // { days: [{date, events: [...]}], generatedAt }
-        let loadState = "loading";          // loading | ok | stale | error | setup
+        let weekData = null;
+        let loadState = "loading";
         let loading = false;
 
         const badgeColors = [
@@ -148,12 +146,10 @@
             "bg-sky-500 text-white", "bg-indigo-500 text-white", "bg-violet-500 text-white", "bg-fuchsia-500 text-white"
         ];
 
-        /* ───────── Utilità ───────── */
         function esc(s) {
             return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
         }
 
-        // Data di oggi a Roma nel formato YYYY-MM-DD
         function romeToday() {
             return new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
         }
@@ -170,9 +166,8 @@
             return Math.round((Date.parse(toIso + "T00:00:00Z") - Date.parse(fromIso + "T00:00:00Z")) / 86400000);
         }
 
-        function isoToDate(iso) { return new Date(iso + "T12:00:00Z"); } // da formattare con timeZone "UTC"
+        function isoToDate(iso) { return new Date(iso + "T12:00:00Z"); }
 
-        /* ───────── Saluto ───────── */
         function updateGreeting() {
             const now = new Date();
             const hour = romeHour(now);
@@ -189,7 +184,6 @@
                 now.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: TZ });
         }
 
-        /* ───────── Tema e menu ───────── */
         function toggleTheme() {
             isDark = !isDark;
             const body = document.body;
@@ -251,11 +245,9 @@
             document.getElementById("listOverlay").classList.add("hidden");
         }
 
-        /* ───────── Dati reali dal Worker ───────── */
         function readCache() {
             try {
                 const data = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
-                // si usa solo se il primo giorno è ancora oggi (a Roma)
                 if (data && data.days && data.days[0] && data.days[0].date === romeToday()) return data;
             } catch (e) {}
             return null;
@@ -267,11 +259,6 @@
         }
 
         async function loadWeek() {
-            if (WORKER_URL.includes("TUO-SUBDOMINIO")) {
-                loadState = "setup";
-                renderAll();
-                return;
-            }
             if (loading) return;
             loading = true;
             setSpinning(true);
@@ -294,7 +281,6 @@
             }
         }
 
-        /* ───────── Rendering ───────── */
         function renderStatus() {
             const card = document.getElementById("statusCard");
             const line = document.getElementById("statusLine");
@@ -303,24 +289,17 @@
             card.classList.add("hidden");
             card.innerHTML = "";
 
-            if (loadState === "setup") {
-                card.className = `p-5 rounded-3xl border-2 ${box}`;
-                card.innerHTML = `
-                    <p class="font-bold text-lg mb-1">Manca un ultimo passo</p>
-                    <p class="text-sm opacity-70">Apri questo file e scrivi l'indirizzo del Worker in <code>WORKER_URL</code> (e la parola d'ordine in <code>WORKER_KEY</code>, se l'hai impostata).</p>`;
-            } else if (loadState === "error") {
+            if (loadState === "error") {
                 card.className = `p-5 rounded-3xl border-2 ${box}`;
                 card.innerHTML = `
                     <p class="font-bold text-lg mb-1">Non riesco a leggere il calendario</p>
-                    <p class="text-sm opacity-70 mb-3">Controlla la connessione e riprova. Se succede ancora, verifica l'indirizzo del Worker.</p>
+                    <p class="text-sm opacity-70 mb-3">Controlla la connessione e riprova.</p>
                     <button onclick="loadWeek()" class="px-4 py-2 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-500 transition-all">Riprova</button>`;
+                card.classList.remove("hidden");
             } else if (loadState === "stale" && weekData) {
                 line.textContent = `Senza connessione: mostro i dati delle ${romeTime(weekData.generatedAt)}.`;
                 line.classList.remove("hidden");
-                card.className = "hidden";
-                return;
             }
-            if (loadState === "setup" || loadState === "error") card.classList.remove("hidden");
         }
 
         function renderAll() {
@@ -344,7 +323,6 @@
             const days = weekData.days;
             const todayData = days.find(d => d.date === today) || { events: [] };
 
-            // 1. Focus Oggi
             if (todayData.events.length > 0) {
                 todayData.events.forEach(e => {
                     const isPast = !e.allDay && e.startMs < nowMs;
@@ -369,7 +347,6 @@
                 todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic">Nessun appuntamento per oggi. Relax! ✨</div>';
             }
 
-            // 2. Vista 7 giorni
             days.forEach((day, i) => {
                 const date = isoToDate(day.date);
                 const dayNum = date.getUTCDate();
@@ -417,10 +394,8 @@
             lucide.createIcons();
         }
 
-        /* ───────── Avvio e aggiornamenti ───────── */
         function tick() {
             updateGreeting();
-            // a mezzanotte (ora di Roma) la finestra dei 7 giorni va ricaricata
             if (weekData && weekData.days[0].date !== romeToday()) {
                 loadWeek();
             } else {
@@ -438,7 +413,7 @@
 
         updateGreeting();
         const cached = readCache();
-        if (cached) weekData = cached;      // mostra subito l'ultimo aggiornamento mentre carica
+        if (cached) weekData = cached;
         renderAll();
         lucide.createIcons();
         loadWeek();
