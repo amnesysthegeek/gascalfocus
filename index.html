@@ -34,9 +34,9 @@
     <div class="header-safe-strip w-full sticky top-0 z-40 shadow-lg"></div>
 
     <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full">
-        <!-- Header con Titolo a due righe e Widget Meteo di Oggi -->
+        <!-- Header con Titolo a due righe e Widget Meteo Cliccabile -->
         <div class="flex justify-between items-center mb-8 pt-2 gap-2">
-            <div class="flex items-center gap-3 shrink-0">
+            <div class="flex items-center gap-2.5 shrink-0">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
                     <i data-lucide="calendar" class="text-white w-6 h-6"></i>
                 </div>
@@ -45,10 +45,22 @@
                     <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-400">Focus</span>
                 </div>
                 
-                <!-- Widget Meteo Principale (Oggi) -->
-                <div id="weatherBox" class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold ml-1">
-                    <i data-lucide="cloud-sun" class="w-4 h-4 text-amber-400" id="weatherIcon"></i>
-                    <span id="weatherTemp" class="text-slate-200">--°C</span>
+                <!-- Widget Meteo Cliccabile con Menu a Tendina -->
+                <div class="relative ml-1">
+                    <button onclick="toggleWeatherMenu()" id="weatherBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold hover:bg-slate-700 transition-colors">
+                        <i data-lucide="cloud-sun" class="w-4 h-4 text-amber-400" id="weatherIcon"></i>
+                        <span id="weatherTemp" class="text-slate-200">--°C</span>
+                    </button>
+                    <!-- Menu Previsioni Meteo Esteso -->
+                    <div id="weatherMenu" class="hidden absolute left-0 mt-2 w-64 rounded-2xl p-4 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a] text-xs space-y-3">
+                        <div class="font-bold border-b border-slate-700 pb-2 flex justify-between items-center text-sm">
+                            <span>Previsioni Meteo</span>
+                            <i data-lucide="cloud-sun" class="w-4 h-4 text-indigo-400"></i>
+                        </div>
+                        <div id="weatherForecastList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                            <div class="text-center opacity-50 py-2">Caricamento previsioni...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -202,7 +214,8 @@
         let isDark = true;
         let weekData = null;
         let sharedLists = { todo: [], shopping: [], notes: [] };
-        let weatherForecast = {}; // Memorizza le previsioni per i vari giorni
+        let weatherForecast = {};
+        let rawDailyData = null; // Memorizza i dati grezzi per il menu esteso
         let loadState = "loading";
         let loading = false;
         let currentListType = "todo";
@@ -237,7 +250,7 @@
 
         function isoToDate(iso) { return new Date(iso + "T12:00:00Z"); }
 
-        /* ───────── Gestione Meteo Completa (Oggi + 6 Giorni) ───────── */
+        /* ───────── Gestione Meteo ───────── */
         function initWeather() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
@@ -245,7 +258,6 @@
                         const lat = pos.coords.latitude;
                         const lon = pos.coords.longitude;
                         try {
-                            // Richiediamo sia il meteo attuale che le previsioni giornaliere (daily)
                             const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`);
                             const data = await res.json();
                             
@@ -254,7 +266,7 @@
                             }
 
                             if (data && data.daily) {
-                                // Mappa i dati giornalieri per data (es. "2026-10-30")
+                                rawDailyData = data.daily;
                                 for (let i = 0; i < data.daily.time.length; i++) {
                                     weatherForecast[data.daily.time[i]] = {
                                         code: data.daily.weathercode[i],
@@ -262,7 +274,8 @@
                                         min: Math.round(data.daily.temperature_2m_min[i])
                                     };
                                 }
-                                renderAll(); // Ridisegna la griglia per mostrare il meteo nei giorni successivi
+                                buildWeatherMenuDropdown();
+                                renderAll();
                             }
                         } catch (e) {
                             console.log("Errore caricamento meteo:", e);
@@ -319,11 +332,58 @@
             lucide.createIcons();
         }
 
-        function toggleAlarmMenu() {
+        function buildWeatherMenuDropdown() {
+            if (!rawDailyData) return;
+            const container = document.getElementById("weatherForecastList");
+            container.innerHTML = "";
+
+            for (let i = 0; i < rawDailyData.time.length; i++) {
+                const dateStr = rawDailyData.time[i];
+                const dateObj = isoToDate(dateStr);
+                const dayName = dateObj.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+                const code = rawDailyData.weathercode[i];
+                const max = Math.round(rawDailyData.temperature_2m_max[i]);
+                const min = Math.round(rawDailyData.temperature_2m_min[i]);
+                const details = getWeatherDetails(code, 1);
+
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-800/60">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="${details.iconName}" class="w-4 h-4 ${details.iconColor}"></i>
+                            <span class="capitalize font-medium">${dayName}</span>
+                        </div>
+                        <div class="flex items-center gap-2 opacity-80">
+                            <span>${details.label}</span>
+                            <span class="font-bold text-indigo-300">${min}° / ${max}°</span>
+                        </div>
+                    </div>`;
+            }
+            lucide.createIcons();
+        }
+
+        /* ───────── Gestione Esclusiva dei Menu (inclusa la tendina meteo) ───────── */
+        function toggleWeatherMenu() {
+            const weatherMenu = document.getElementById("weatherMenu");
             const alarmMenu = document.getElementById("alarmMenu");
             const listMenu = document.getElementById("listMenu");
             const chevron = document.getElementById("chevron");
 
+            if (!alarmMenu.classList.contains("hidden")) alarmMenu.classList.add("hidden");
+            if (!listMenu.classList.contains("hidden")) {
+                listMenu.classList.add("hidden");
+                chevron.classList.remove("rotate-90");
+            }
+
+            weatherMenu.classList.toggle("hidden");
+        }
+
+        function toggleAlarmMenu() {
+            const alarmMenu = document.getElementById("alarmMenu");
+            const weatherMenu = document.getElementById("weatherMenu");
+            const listMenu = document.getElementById("listMenu");
+            const chevron = document.getElementById("chevron");
+
+            if (!weatherMenu.classList.contains("hidden")) weatherMenu.classList.add("hidden");
             if (!listMenu.classList.contains("hidden")) {
                 listMenu.classList.add("hidden");
                 chevron.classList.remove("rotate-90");
@@ -338,11 +398,11 @@
         function toggleMenu() {
             const listMenu = document.getElementById("listMenu");
             const alarmMenu = document.getElementById("alarmMenu");
+            const weatherMenu = document.getElementById("weatherMenu");
             const chevron = document.getElementById("chevron");
 
-            if (!alarmMenu.classList.contains("hidden")) {
-                alarmMenu.classList.add("hidden");
-            }
+            if (!alarmMenu.classList.contains("hidden")) alarmMenu.classList.add("hidden");
+            if (!weatherMenu.classList.contains("hidden")) weatherMenu.classList.add("hidden");
 
             listMenu.classList.toggle("hidden");
             chevron.classList.toggle("rotate-90");
@@ -449,17 +509,20 @@
             const btn = document.getElementById("themeToggle");
             const refresh = document.getElementById("refreshBtn");
             const alarmBtn = document.getElementById("alarmBtn");
+            const weatherBtn = document.getElementById("weatherBtn");
             if (isDark) {
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
                 btn.className = "p-2 rounded-full bg-slate-700 text-amber-400 hover:bg-slate-600";
                 refresh.className = "p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600";
                 alarmBtn.className = "p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 relative";
+                weatherBtn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold hover:bg-slate-700 transition-colors";
                 btn.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
             } else {
                 body.className = "bg-slate-50 text-slate-900 min-h-screen flex flex-col";
                 btn.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm";
                 refresh.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm";
                 alarmBtn.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm relative";
+                weatherBtn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-200/80 border border-slate-300 text-xs font-semibold hover:bg-slate-300 transition-colors";
                 btn.innerHTML = '<i data-lucide="moon" class="w-5 h-5"></i>';
             }
             lucide.createIcons();
@@ -674,7 +737,6 @@
                 const count = day.events.length;
                 const countLabel = count === 1 ? "1 impegno" : `${count} impegni`;
 
-                // Recupera il meteo giornaliero per questa specifica data (se disponibile)
                 const dayWeather = weatherForecast[day.date];
                 let weatherHtml = "";
                 if (dayWeather) {
