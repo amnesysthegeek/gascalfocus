@@ -34,23 +34,36 @@
     <div class="header-safe-strip w-full sticky top-0 z-40 shadow-lg"></div>
 
     <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8 pt-2">
-            <div class="flex items-center gap-3">
+        <!-- Header con il nuovo ordine richiesto -->
+        <div class="flex justify-between items-center mb-8 pt-2 gap-2">
+            <!-- 1. Icona e Nome dell'App (Sinistra) -->
+            <div class="flex items-center gap-2.5 shrink-0">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
                     <i data-lucide="calendar" class="text-white w-6 h-6"></i>
                 </div>
-                <h1 class="text-xl font-bold tracking-tight">GasCalendar <span class="text-indigo-400">Focus</span></h1>
+                <h1 class="text-lg md:text-xl font-bold tracking-tight">GasCalendar <span class="text-indigo-400">Focus</span></h1>
             </div>
-            <div class="flex items-center gap-2">
-                <!-- Pulsante Campanella Promemoria -->
+
+            <!-- Gruppo Pulsanti (Destra) -->
+            <div class="flex items-center gap-1.5 md:gap-2">
+                <!-- 2. Switch Giorno / Notte -->
+                <button id="themeToggle" aria-label="Cambia tema" class="p-2 rounded-full bg-slate-700 text-amber-400 hover:bg-slate-600 transition-colors">
+                    <i data-lucide="sun" class="w-5 h-5"></i>
+                </button>
+
+                <!-- 3. Icona Reload -->
+                <button id="refreshBtn" aria-label="Aggiorna" class="p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors">
+                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                </button>
+
+                <!-- 4. Icona Campanella Promemoria -->
                 <div class="relative">
                     <button id="alarmBtn" onclick="toggleAlarmMenu()" class="p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors relative" title="Imposta Promemoria">
                         <i data-lucide="bell" class="w-5 h-5" id="bellIcon"></i>
                         <span id="alarmBadge" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-indigo-500 rounded-full ring-2 ring-[#1a1c2e]"></span>
                     </button>
-                    <!-- Menu a tendina per la Campanella -->
-                    <div id="alarmMenu" class="hidden absolute right-0 mt-2 w-64 rounded-2xl p-4 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a] text-sm space-y-3">
+                    <!-- Menu a tendina Campanella (posizionato per non uscire dallo schermo) -->
+                    <div id="alarmMenu" class="hidden absolute left-1/2 -translate-x-1/2 md:left-auto md:right-0 mt-2 w-64 rounded-2xl p-4 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a] text-sm space-y-3">
                         <div class="font-bold border-b border-slate-700 pb-2 flex justify-between items-center">
                             <span>Promemoria & Avvisi</span>
                             <i data-lucide="bell-ring" class="w-4 h-4 text-indigo-400"></i>
@@ -76,18 +89,11 @@
                     </div>
                 </div>
 
-                <button id="refreshBtn" aria-label="Aggiorna" class="p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors">
-                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-                </button>
-                <button id="themeToggle" aria-label="Cambia tema" class="p-2 rounded-full bg-slate-700 text-amber-400 hover:bg-slate-600 transition-colors">
-                    <i data-lucide="sun" class="w-5 h-5"></i>
-                </button>
-                
-                <!-- Menu Liste -->
+                <!-- 5. Menu Liste (Estrema Destra) -->
                 <div class="relative">
-                    <button id="listBtn" class="flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all bg-slate-700 text-slate-200 hover:bg-slate-600">
+                    <button id="listBtn" onclick="toggleMenu()" class="flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-full font-medium transition-all bg-slate-700 text-slate-200 hover:bg-slate-600 text-sm">
                         <i data-lucide="list-todo" class="w-4 h-4"></i>
-                        <span id="listLabel">Liste</span>
+                        <span id="listLabel" class="hidden sm:inline">Liste</span>
                         <i data-lucide="chevron-right" class="w-4 h-4 transition-transform" id="chevron"></i>
                     </button>
                     <div id="listMenu" class="hidden absolute right-0 mt-2 w-48 rounded-2xl p-2 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a]">
@@ -195,9 +201,8 @@
         let loading = false;
         let currentListType = "todo";
 
-        // Gestione Impostazioni Promemoria
         let alarmSettings = JSON.parse(localStorage.getItem("gas_alarm_settings") || '{"offset":10,"sound":true}');
-        let notifiedEvents = new Set(); // Evita doppie notifiche per lo stesso evento
+        let notifiedEvents = new Set();
 
         const badgeColors = [
             "bg-rose-500 text-white", "bg-amber-500 text-white", "bg-emerald-500 text-white",
@@ -226,11 +231,36 @@
 
         function isoToDate(iso) { return new Date(iso + "T12:00:00Z"); }
 
-        // Gestione menu campanella
+        /* ───────── Gestione Esclusiva dei Menu ───────── */
         function toggleAlarmMenu() {
-            const menu = document.getElementById("alarmMenu");
-            menu.classList.toggle("hidden");
-            document.getElementById("alarmMenu").classList.contains("hidden") ? document.getElementById("alarmBadge").classList.add("hidden") : null;
+            const alarmMenu = document.getElementById("alarmMenu");
+            const listMenu = document.getElementById("listMenu");
+            const chevron = document.getElementById("chevron");
+
+            // Chiude il menu Liste se è aperto
+            if (!listMenu.classList.contains("hidden")) {
+                listMenu.classList.add("hidden");
+                chevron.classList.remove("rotate-90");
+            }
+
+            alarmMenu.classList.toggle("hidden");
+            if (!alarmMenu.classList.contains("hidden")) {
+                document.getElementById("alarmBadge").classList.add("hidden");
+            }
+        }
+
+        function toggleMenu() {
+            const listMenu = document.getElementById("listMenu");
+            const alarmMenu = document.getElementById("alarmMenu");
+            const chevron = document.getElementById("chevron");
+
+            // Chiude il menu Campanella se è aperto
+            if (!alarmMenu.classList.contains("hidden")) {
+                alarmMenu.classList.add("hidden");
+            }
+
+            listMenu.classList.toggle("hidden");
+            chevron.classList.toggle("rotate-90");
         }
 
         function saveAlarmSettings() {
@@ -243,7 +273,6 @@
         function updateAlarmBadge() {
             document.getElementById("alarmOffset").value = alarmSettings.offset;
             document.getElementById("alarmSound").checked = alarmSettings.sound;
-            document.getElementById("alarmBadge").classList.remove("hidden");
         }
 
         async function requestNotificationPermission() {
@@ -259,7 +288,6 @@
             }
         }
 
-        // Sintesi sonora campanello via Web Audio API
         function playChimeSound() {
             if (!alarmSettings.sound) return;
             try {
@@ -267,8 +295,8 @@
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = "sine";
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // Nota D5
-                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // Nota A5
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
                 gain.gain.setValueAtTime(0.2, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
                 osc.connect(gain);
@@ -290,7 +318,6 @@
             todayData.events.forEach(e => {
                 if (e.allDay || !e.startMs) return;
                 const timeDiff = e.startMs - now;
-                // Controlla se l'evento rientra nella finestra di preavviso e non è già stato notificato
                 if (timeDiff >= 0 && timeDiff <= offsetMs && !notifiedEvents.has(e.id)) {
                     notifiedEvents.add(e.id);
                     triggerAlarm(e.title, e.time);
@@ -300,11 +327,9 @@
 
         function triggerAlarm(title, time) {
             playChimeSound();
-            // Mostra popup in-app
             document.getElementById("alarmPopupTitle").innerText = `${title} (alle ${time})`;
             document.getElementById("alarmPopup").classList.remove("hidden");
 
-            // Mostra notifica nativa del telefono se consentita
             if ("Notification" in window && Notification.permission === "granted") {
                 new Notification("GasCalendar Promemoria", {
                     body: `Tra poco: ${title} alle ${time}`,
@@ -356,13 +381,6 @@
             renderAll();
         }
 
-        function toggleMenu() {
-            const menu = document.getElementById("listMenu");
-            const chevron = document.getElementById("chevron");
-            menu.classList.toggle("hidden");
-            chevron.classList.toggle("rotate-90");
-        }
-
         function openList(type) {
             currentListType = type;
             const overlay = document.getElementById("listOverlay");
@@ -382,7 +400,10 @@
             renderListItems();
             overlay.classList.remove("hidden");
             lucide.createIcons();
-            toggleMenu();
+            
+            // Chiude il menu Liste dopo la selezione
+            document.getElementById("listMenu").classList.add("hidden");
+            document.getElementById("chevron").classList.remove("rotate-90");
         }
 
         function closeList() {
@@ -614,7 +635,6 @@
         }
 
         document.getElementById("themeToggle").onclick = toggleTheme;
-        document.getElementById("listBtn").onclick = toggleMenu;
         document.getElementById("refreshBtn").onclick = loadWeek;
 
         document.addEventListener("visibilitychange", () => {
