@@ -34,6 +34,7 @@
     <div class="header-safe-strip w-full sticky top-0 z-40 shadow-lg"></div>
 
     <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full">
+        <!-- Header -->
         <div class="flex justify-between items-center mb-8 pt-2">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
@@ -42,12 +43,47 @@
                 <h1 class="text-xl font-bold tracking-tight">GasCalendar <span class="text-indigo-400">Focus</span></h1>
             </div>
             <div class="flex items-center gap-2">
+                <!-- Pulsante Campanella Promemoria -->
+                <div class="relative">
+                    <button id="alarmBtn" onclick="toggleAlarmMenu()" class="p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors relative" title="Imposta Promemoria">
+                        <i data-lucide="bell" class="w-5 h-5" id="bellIcon"></i>
+                        <span id="alarmBadge" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-indigo-500 rounded-full ring-2 ring-[#1a1c2e]"></span>
+                    </button>
+                    <!-- Menu a tendina per la Campanella -->
+                    <div id="alarmMenu" class="hidden absolute right-0 mt-2 w-64 rounded-2xl p-4 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a] text-sm space-y-3">
+                        <div class="font-bold border-b border-slate-700 pb-2 flex justify-between items-center">
+                            <span>Promemoria & Avvisi</span>
+                            <i data-lucide="bell-ring" class="w-4 h-4 text-indigo-400"></i>
+                        </div>
+                        <div>
+                            <label class="block text-xs opacity-70 mb-1">Anticipo avviso:</label>
+                            <select id="alarmOffset" onchange="saveAlarmSettings()" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white text-xs focus:outline-none focus:border-indigo-500">
+                                <option value="0">Esattamente all'orario</option>
+                                <option value="5">5 minuti prima</option>
+                                <option value="10" selected>10 minuti prima</option>
+                                <option value="15">15 minuti prima</option>
+                                <option value="30">30 minuti prima</option>
+                                <option value="60">1 ora prima</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between pt-1">
+                            <span>Attiva suoni</span>
+                            <input type="checkbox" id="alarmSound" checked onchange="saveAlarmSettings()" class="w-4 h-4 accent-indigo-600 rounded cursor-pointer">
+                        </div>
+                        <button onclick="requestNotificationPermission()" class="w-full py-2 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 rounded-xl text-xs font-semibold transition-colors">
+                            Abilita Notifiche Telefono
+                        </button>
+                    </div>
+                </div>
+
                 <button id="refreshBtn" aria-label="Aggiorna" class="p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors">
                     <i data-lucide="refresh-cw" class="w-5 h-5"></i>
                 </button>
                 <button id="themeToggle" aria-label="Cambia tema" class="p-2 rounded-full bg-slate-700 text-amber-400 hover:bg-slate-600 transition-colors">
                     <i data-lucide="sun" class="w-5 h-5"></i>
                 </button>
+                
+                <!-- Menu Liste -->
                 <div class="relative">
                     <button id="listBtn" class="flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all bg-slate-700 text-slate-200 hover:bg-slate-600">
                         <i data-lucide="list-todo" class="w-4 h-4"></i>
@@ -82,6 +118,22 @@
 
             <div id="statusCard" class="hidden"></div>
 
+            <!-- Modal Pop-up Notifica Evento in arrivo -->
+            <div id="alarmPopup" class="hidden p-5 rounded-3xl border-2 bg-indigo-950/90 border-indigo-500 shadow-2xl flex items-center justify-between animate-pulse">
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-indigo-600 rounded-2xl text-white">
+                        <i data-lucide="bell-ring" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase font-bold text-indigo-300 tracking-wider">Promemoria Evento</p>
+                        <h4 id="alarmPopupTitle" class="text-lg font-bold">Titolo Evento</h4>
+                    </div>
+                </div>
+                <button onclick="dismissAlarmPopup()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-500 transition-colors">
+                    Ho capito
+                </button>
+            </div>
+
             <div id="todayFocus" class="space-y-4">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="h-1 w-8 bg-indigo-500 rounded-full"></div>
@@ -99,6 +151,7 @@
             </div>
         </main>
 
+        <!-- List Overlay -->
         <div id="listOverlay" class="fixed inset-0 z-[100] hidden flex items-end md:items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
             <div id="listCard" class="w-full max-w-lg rounded-t-3xl md:rounded-3xl overflow-hidden bg-[#25284d] border border-[#3a3f7a] shadow-2xl animate-slide-up">
                 <div class="p-5 flex justify-between items-center border-b border-slate-700/50">
@@ -142,6 +195,10 @@
         let loading = false;
         let currentListType = "todo";
 
+        // Gestione Impostazioni Promemoria
+        let alarmSettings = JSON.parse(localStorage.getItem("gas_alarm_settings") || '{"offset":10,"sound":true}');
+        let notifiedEvents = new Set(); // Evita doppie notifiche per lo stesso evento
+
         const badgeColors = [
             "bg-rose-500 text-white", "bg-amber-500 text-white", "bg-emerald-500 text-white",
             "bg-sky-500 text-white", "bg-indigo-500 text-white", "bg-violet-500 text-white", "bg-fuchsia-500 text-white"
@@ -169,6 +226,97 @@
 
         function isoToDate(iso) { return new Date(iso + "T12:00:00Z"); }
 
+        // Gestione menu campanella
+        function toggleAlarmMenu() {
+            const menu = document.getElementById("alarmMenu");
+            menu.classList.toggle("hidden");
+            document.getElementById("alarmMenu").classList.contains("hidden") ? document.getElementById("alarmBadge").classList.add("hidden") : null;
+        }
+
+        function saveAlarmSettings() {
+            alarmSettings.offset = parseInt(document.getElementById("alarmOffset").value);
+            alarmSettings.sound = document.getElementById("alarmSound").checked;
+            localStorage.setItem("gas_alarm_settings", JSON.stringify(alarmSettings));
+            updateAlarmBadge();
+        }
+
+        function updateAlarmBadge() {
+            document.getElementById("alarmOffset").value = alarmSettings.offset;
+            document.getElementById("alarmSound").checked = alarmSettings.sound;
+            document.getElementById("alarmBadge").classList.remove("hidden");
+        }
+
+        async function requestNotificationPermission() {
+            if ("Notification" in window) {
+                const perm = await Notification.requestPermission();
+                if (perm === "granted") {
+                    alert("Notifiche abilitate con successo!");
+                } else {
+                    alert("I permessi di notifica sono stati negati.");
+                }
+            } else {
+                alert("Il tuo browser non supporta le notifiche native.");
+            }
+        }
+
+        // Sintesi sonora campanello via Web Audio API
+        function playChimeSound() {
+            if (!alarmSettings.sound) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // Nota D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3); // Nota A5
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 1.2);
+            } catch (e) {}
+        }
+
+        function checkUpcomingEvents() {
+            if (!weekData || !weekData.days) return;
+            const now = Date.now();
+            const today = romeToday();
+            const todayData = weekData.days.find(d => d.date === today);
+            if (!todayData || !todayData.events) return;
+
+            const offsetMs = alarmSettings.offset * 60 * 1000;
+
+            todayData.events.forEach(e => {
+                if (e.allDay || !e.startMs) return;
+                const timeDiff = e.startMs - now;
+                // Controlla se l'evento rientra nella finestra di preavviso e non è già stato notificato
+                if (timeDiff >= 0 && timeDiff <= offsetMs && !notifiedEvents.has(e.id)) {
+                    notifiedEvents.add(e.id);
+                    triggerAlarm(e.title, e.time);
+                }
+            });
+        }
+
+        function triggerAlarm(title, time) {
+            playChimeSound();
+            // Mostra popup in-app
+            document.getElementById("alarmPopupTitle").innerText = `${title} (alle ${time})`;
+            document.getElementById("alarmPopup").classList.remove("hidden");
+
+            // Mostra notifica nativa del telefono se consentita
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("GasCalendar Promemoria", {
+                    body: `Tra poco: ${title} alle ${time}`,
+                    icon: "icon.png"
+                });
+            }
+        }
+
+        function dismissAlarmPopup() {
+            document.getElementById("alarmPopup").classList.add("hidden");
+        }
+
         function updateGreeting() {
             const now = new Date();
             const hour = romeHour(now);
@@ -190,15 +338,18 @@
             const body = document.body;
             const btn = document.getElementById("themeToggle");
             const refresh = document.getElementById("refreshBtn");
+            const alarmBtn = document.getElementById("alarmBtn");
             if (isDark) {
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
                 btn.className = "p-2 rounded-full bg-slate-700 text-amber-400 hover:bg-slate-600";
                 refresh.className = "p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600";
+                alarmBtn.className = "p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 relative";
                 btn.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
             } else {
                 body.className = "bg-slate-50 text-slate-900 min-h-screen flex flex-col";
                 btn.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm";
                 refresh.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm";
+                alarmBtn.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm relative";
                 btn.innerHTML = '<i data-lucide="moon" class="w-5 h-5"></i>';
             }
             lucide.createIcons();
@@ -277,7 +428,7 @@
                 });
                 if (!res.ok) throw new Error("Errore salvataggio");
                 input.value = "";
-                await loadWeek(); // Ricarica i dati aggiornati dal Cloud
+                await loadWeek();
                 renderListItems();
             } catch (err) {
                 alert("Impossibile aggiungere l'elemento. Verifica la connessione.");
@@ -293,7 +444,7 @@
                     method: "DELETE"
                 });
                 if (!res.ok) throw new Error("Errore eliminazione");
-                await loadWeek(); // Ricarica i dati aggiornati dal Cloud
+                await loadWeek();
                 renderListItems();
             } catch (err) {
                 alert("Impossibile eliminare l'elemento.");
@@ -454,6 +605,7 @@
 
         function tick() {
             updateGreeting();
+            checkUpcomingEvents();
             if (weekData && weekData.days[0].date !== romeToday()) {
                 loadWeek();
             } else {
@@ -470,6 +622,7 @@
         });
 
         updateGreeting();
+        updateAlarmBadge();
         const cached = readCache();
         if (cached) weekData = cached;
         renderAll();
