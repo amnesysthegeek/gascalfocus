@@ -15,7 +15,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        /* Blocca qualsiasi scorrimento o movimento orizzontale indesiderato */
         html, body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
@@ -45,7 +44,6 @@
 
     <div class="header-safe-strip w-full sticky top-0 z-40 shadow-lg"></div>
 
-    <!-- Contenitore principale flessibile e centrato per adattarsi a qualsiasi schermo, inclusi Z Fold e Duo -->
     <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full overflow-x-hidden">
         <!-- Header -->
         <div class="flex justify-between items-center mb-8 pt-2 gap-2 w-full">
@@ -296,13 +294,16 @@
                                 updateWeatherUI(data.current_weather.temperature, data.current_weather.weathercode, data.current_weather.is_day);
                             }
 
-                            if (data && data.daily) {
+                            if (data && data.daily && data.daily.time) {
                                 rawDailyData = data.daily;
                                 for (let i = 0; i < data.daily.time.length; i++) {
+                                    const maxVal = data.daily.temperature_2m_max && data.daily.temperature_2m_max[i] !== undefined ? Math.round(data.daily.temperature_2m_max[i]) : null;
+                                    const minVal = data.daily.temperature_2m_min && data.daily.temperature_2m_min[i] !== undefined ? Math.round(data.daily.temperature_2m_min[i]) : null;
+                                    
                                     weatherForecast[data.daily.time[i]] = {
-                                        code: data.daily.weathercode[i],
-                                        max: Math.round(data.daily.temperature_2m_max[i]),
-                                        min: Math.round(data.daily.temperature_2m_min[i])
+                                        code: data.daily.weathercode ? data.daily.weathercode[i] : 0,
+                                        max: maxVal,
+                                        min: minVal
                                     };
                                 }
                                 buildWeatherMenuDropdown();
@@ -356,7 +357,9 @@
         function updateWeatherUI(temp, code, isDay) {
             const tempEl = document.getElementById("weatherTemp");
             const iconEl = document.getElementById("weatherIcon");
-            tempEl.innerText = `${Math.round(temp)}°C`;
+            if (temp !== undefined && temp !== null) {
+                tempEl.innerText = `${Math.round(temp)}°C`;
+            }
 
             const details = getWeatherDetails(code, isDay);
             iconEl.setAttribute("data-lucide", details.iconName);
@@ -365,7 +368,7 @@
         }
 
         function buildWeatherMenuDropdown() {
-            if (!rawDailyData) return;
+            if (!rawDailyData || !rawDailyData.time) return;
             const container = document.getElementById("weatherForecastList");
             container.innerHTML = "";
 
@@ -373,10 +376,12 @@
                 const dateStr = rawDailyData.time[i];
                 const dateObj = isoToDate(dateStr);
                 const dayName = dateObj.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
-                const code = rawDailyData.weathercode[i];
-                const max = Math.round(rawDailyData.temperature_2m_max[i]);
-                const min = Math.round(rawDailyData.temperature_2m_min[i]);
+                const code = rawDailyData.weathercode ? rawDailyData.weathercode[i] : 0;
+                const max = rawDailyData.temperature_2m_max && rawDailyData.temperature_2m_max[i] !== undefined ? Math.round(rawDailyData.temperature_2m_max[i]) : null;
+                const min = rawDailyData.temperature_2m_min && rawDailyData.temperature_2m_min[i] !== undefined ? Math.round(rawDailyData.temperature_2m_min[i]) : null;
                 const details = getWeatherDetails(code, 1);
+
+                const tempText = (min !== null && max !== null) ? `<span class="font-bold text-indigo-300">${min}° / ${max}°</span>` : '';
 
                 container.innerHTML += `
                     <div class="flex items-center justify-between p-2 rounded-xl bg-slate-800/60 gap-2">
@@ -386,7 +391,7 @@
                         </div>
                         <div class="flex items-center gap-2 opacity-80 shrink-0">
                             <span>${details.label}</span>
-                            <span class="font-bold text-indigo-300">${min}° / ${max}°</span>
+                            ${tempText}
                         </div>
                     </div>`;
             }
@@ -772,11 +777,15 @@
                 let weatherHtml = "";
                 if (dayWeather) {
                     const wDetails = getWeatherDetails(dayWeather.code, 1);
+                    const tempDisplay = (dayWeather.min !== null && dayWeather.max !== null) 
+                        ? `<span class="opacity-60 ml-auto shrink-0">${dayWeather.min}° / ${dayWeather.max}°</span>` 
+                        : '';
+                    
                     weatherHtml = `
                         <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800/50 border border-slate-700/40 text-xs font-semibold">
                             <i data-lucide="${wDetails.iconName}" class="w-3.5 h-3.5 ${wDetails.iconColor} shrink-0"></i>
                             <span class="text-slate-200 truncate">${wDetails.label}</span>
-                            <span class="opacity-60 ml-auto shrink-0">${wDetails.min}° / ${wDetails.max}°</span>
+                            ${tempDisplay}
                         </div>`;
                 }
 
