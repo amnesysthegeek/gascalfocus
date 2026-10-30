@@ -30,6 +30,11 @@
             background: linear-gradient(135deg, #101226 0%, #1a1c2e 40%, #312e81 80%, #6366f1 100%);
             border-bottom: 1px solid rgba(165, 180, 252, 0.2);
         }
+        .header-safe-strip-light {
+            height: max(env(safe-area-inset-top, 50px), 60px);
+            background: linear-gradient(135deg, #fef08a 0%, #fde047 50%, #eab308 100%);
+            border-bottom: 1px solid rgba(234, 179, 8, 0.3);
+        }
         .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px); }
         .card-pop { transition: transform 0.2s ease; }
         .card-pop:active { transform: scale(0.98); }
@@ -38,29 +43,29 @@
         @media (prefers-reduced-motion: reduce) { .animate-slide-up { animation: none; } }
     </style>
 </head>
-<body class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
+<body id="bodyRoot" class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <div class="header-safe-strip w-full sticky top-0 z-40 shadow-lg"></div>
+    <div id="headerStrip" class="header-safe-strip w-full sticky top-0 z-40 shadow-lg"></div>
 
     <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full overflow-x-hidden">
         <!-- Header -->
         <div class="flex justify-between items-center mb-8 pt-2 gap-2 w-full">
             <div class="flex items-center gap-2.5 shrink-0 min-w-0">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
+                <div id="appLogoBox" class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
                     <i data-lucide="calendar" class="text-white w-6 h-6"></i>
                 </div>
                 <div class="flex flex-col leading-tight min-w-0">
                     <h1 class="text-base font-bold tracking-tight truncate">GasCalendar</h1>
-                    <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-400">Focus</span>
+                    <span id="appFocusTag" class="text-xs font-extrabold uppercase tracking-wider text-indigo-400">Focus</span>
                 </div>
                 
                 <!-- Widget Meteo Cliccabile -->
                 <div class="relative ml-1 shrink-0">
-                    <button onclick="toggleWeatherMenu()" id="weatherBtn" class="flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold hover:bg-slate-700 transition-colors">
+                    <button onclick="toggleWeatherMenu()" id="weatherBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold hover:bg-slate-700 transition-colors">
                         <i data-lucide="cloud-sun" class="w-4 h-4 text-amber-400 shrink-0" id="weatherIcon"></i>
                         <span id="weatherTemp" class="text-slate-200">--°C</span>
                     </button>
-                    <!-- Menu Previsioni Meteo Esteso con Localizzazione -->
+                    <!-- Menu Previsioni Meteo Esteso -->
                     <div id="weatherMenu" class="hidden absolute left-0 mt-2 w-64 max-w-[90vw] rounded-2xl p-4 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a] text-xs space-y-3">
                         <div class="border-b border-slate-700 pb-2 flex justify-between items-center">
                             <div class="min-w-0 pr-2">
@@ -145,7 +150,7 @@
             <div class="space-y-4">
                 <h2 id="greeting" class="text-4xl md:text-6xl font-extrabold tracking-tight break-words">Caricamento...</h2>
                 <div class="flex items-center gap-2 text-lg font-medium opacity-80">
-                    <i data-lucide="calendar" class="text-indigo-400 w-5 h-5 shrink-0"></i>
+                    <i data-lucide="calendar" class="text-indigo-400 w-5 h-5 shrink-0" id="dateCalendarIcon"></i>
                     <span id="currentDate" class="truncate"></span>
                 </div>
                 <p id="statusLine" class="hidden text-sm opacity-60"></p>
@@ -171,8 +176,8 @@
 
             <div id="todayFocus" class="space-y-4">
                 <div class="flex items-center gap-2 mb-2">
-                    <div class="h-1 w-8 bg-indigo-500 rounded-full shrink-0"></div>
-                    <span class="text-sm font-bold uppercase tracking-widest text-indigo-400">Appuntamenti di Oggi</span>
+                    <div id="todayBar" class="h-1 w-8 bg-indigo-500 rounded-full shrink-0"></div>
+                    <span id="todayTitleText" class="text-sm font-bold uppercase tracking-widest text-indigo-400">Appuntamenti di Oggi</span>
                 </div>
                 <div id="todayEventsList" class="grid grid-cols-1 gap-3"></div>
             </div>
@@ -223,7 +228,7 @@
         const REFRESH_MS = 5 * 60 * 1000;
         const TICK_MS = 60 * 1000;
 
-        let isDark = true;
+        let isDark = true; // Di default notte (scura)
         let weekData = null;
         let sharedLists = { todo: [], shopping: [], notes: [] };
         let weatherForecast = {};
@@ -262,14 +267,12 @@
 
         function isoToDate(iso) { return new Date(iso + "T12:00:00Z"); }
 
-        /* ───────── Gestione Meteo & Localizzazione ───────── */
         function initWeather() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     async (pos) => {
                         const lat = pos.coords.latitude;
                         const lon = pos.coords.longitude;
-                        
                         try {
                             const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`, {
                                 headers: { 'User-Agent': 'GasCalendarFocus/1.0' }
@@ -313,7 +316,6 @@
                     },
                     (err) => {
                         document.getElementById("weatherLocationName").innerText = "Geolocalizzazione disattivata";
-                        console.log("Geolocalizzazione disattivata/non consentita");
                     }
                 );
             }
@@ -407,7 +409,6 @@
                 listMenu.classList.add("hidden");
                 chevron.classList.remove("rotate-90");
             }
-
             weatherMenu.classList.toggle("hidden");
         }
 
@@ -422,7 +423,6 @@
                 listMenu.classList.add("hidden");
                 chevron.classList.remove("rotate-90");
             }
-
             alarmMenu.classList.toggle("hidden");
             if (!alarmMenu.classList.contains("hidden")) {
                 document.getElementById("alarmBadge").classList.add("hidden");
@@ -537,26 +537,50 @@
                 now.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: TZ });
         }
 
+        /* ───────── Gestione Tema Dinamico (Notte vs Giorno Pop Style) ───────── */
         function toggleTheme() {
             isDark = !isDark;
-            const body = document.body;
+            const body = document.getElementById("bodyRoot");
+            const headerStrip = document.getElementById("headerStrip");
             const btn = document.getElementById("themeToggle");
             const refresh = document.getElementById("refreshBtn");
             const alarmBtn = document.getElementById("alarmBtn");
             const weatherBtn = document.getElementById("weatherBtn");
+            const appLogoBox = document.getElementById("appLogoBox");
+            const appFocusTag = document.getElementById("appFocusTag");
+            const todayBar = document.getElementById("todayBar");
+            const todayTitleText = document.getElementById("todayTitleText");
+            const dateCalendarIcon = document.getElementById("dateCalendarIcon");
+
             if (isDark) {
+                // Stile Notturno (Inalterato e pulito)
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
+                headerStrip.className = "header-safe-strip w-full sticky top-0 z-40 shadow-lg";
+                appLogoBox.className = "w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0";
+                appFocusTag.className = "text-xs font-extrabold uppercase tracking-wider text-indigo-400";
+                todayBar.className = "h-1 w-8 bg-indigo-500 rounded-full shrink-0";
+                todayTitleText.className = "text-sm font-bold uppercase tracking-widest text-indigo-400";
+                dateCalendarIcon.className = "text-indigo-400 w-5 h-5 shrink-0";
+                
                 btn.className = "p-2 rounded-full bg-slate-700 text-amber-400 hover:bg-slate-600 shrink-0";
                 refresh.className = "p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 shrink-0";
                 alarmBtn.className = "p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 relative shrink-0";
-                weatherBtn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold hover:bg-slate-700 transition-colors";
+                weatherBtn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold hover:bg-slate-700 transition-colors text-slate-200";
                 btn.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
             } else {
-                body.className = "bg-slate-50 text-slate-900 min-h-screen flex flex-col";
-                btn.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm shrink-0";
-                refresh.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm shrink-0";
-                alarmBtn.className = "p-2 rounded-full bg-white text-indigo-600 shadow-sm relative shrink-0";
-                weatherBtn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-200/80 border border-slate-300 text-xs font-semibold hover:bg-slate-300 transition-colors";
+                // Stile Giorno "Pop Style" (Ispirato all'immagine)
+                body.className = "bg-amber-50 text-slate-900 min-h-screen flex flex-col";
+                headerStrip.className = "header-safe-strip-light w-full sticky top-0 z-40 shadow-md";
+                appLogoBox.className = "w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-white shrink-0";
+                appFocusTag.className = "text-xs font-extrabold uppercase tracking-wider text-amber-700";
+                todayBar.className = "h-1 w-8 bg-amber-500 rounded-full shrink-0";
+                todayTitleText.className = "text-sm font-bold uppercase tracking-widest text-amber-800";
+                dateCalendarIcon.className = "text-amber-600 w-5 h-5 shrink-0";
+
+                btn.className = "p-2 rounded-full bg-white text-amber-600 shadow-sm shrink-0 border border-amber-200";
+                refresh.className = "p-2 rounded-full bg-white text-amber-700 shadow-sm shrink-0 border border-amber-200";
+                alarmBtn.className = "p-2 rounded-full bg-white text-amber-700 shadow-sm relative shrink-0 border border-amber-200";
+                weatherBtn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-amber-300 text-xs font-semibold hover:bg-amber-100 transition-colors text-slate-800 shadow-sm";
                 btn.innerHTML = '<i data-lucide="moon" class="w-5 h-5"></i>';
             }
             lucide.createIcons();
@@ -604,10 +628,9 @@
             list.forEach((item) => {
                 const isCompleted = item.completed || false;
                 
-                // Per Note Rapide non serve la spunta, solo testo e cestino
                 if (currentListType === "notes") {
                     container.innerHTML += `
-                        <div class="flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-slate-800/60' : 'bg-slate-100'} gap-2">
+                        <div class="flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-slate-800/60' : 'bg-amber-100/70 border border-amber-200'} gap-2">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
                                 <i data-lucide="sticky-note" class="w-5 h-5 text-amber-400 shrink-0"></i>
                                 <span class="text-sm truncate">${esc(item.text)}</span>
@@ -617,13 +640,13 @@
                             </button>
                         </div>`;
                 } else {
-                    // Per Todo e Shopping: Icona spuntabile verde e testo barrato se completato
                     const iconName = isCompleted ? "check-circle" : "circle";
-                    const iconColor = isCompleted ? "text-emerald-500" : "text-indigo-400 hover:text-emerald-400";
+                    const iconColor = isCompleted ? "text-emerald-500" : (isDark ? "text-indigo-400 hover:text-emerald-400" : "text-amber-600 hover:text-emerald-600");
                     const textStyle = isCompleted ? "line-through opacity-50" : "";
+                    const cardBgStyle = isDark ? 'bg-slate-800/60' : 'bg-amber-100/70 border border-amber-200';
 
                     container.innerHTML += `
-                        <div class="flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-slate-800/60' : 'bg-slate-100'} gap-2">
+                        <div class="flex items-center justify-between p-3 rounded-xl ${cardBgStyle} gap-2">
                             <div class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer" onclick="toggleItemComplete('${item.id}', ${!isCompleted})">
                                 <i data-lucide="${iconName}" class="w-5 h-5 ${iconColor} shrink-0 transition-colors"></i>
                                 <span class="text-sm truncate ${textStyle}">${esc(item.text)}</span>
@@ -692,7 +715,7 @@
         function readCache() {
             try {
                 const data = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
-                if (data && data.days && data.days[0] && data.days[0].date === romeToday()) return data;
+                if (data && data.days) return data; // Carica la cache storica completa
             } catch (e) {}
             return null;
         }
@@ -732,7 +755,7 @@
         function renderStatus() {
             const card = document.getElementById("statusCard");
             const line = document.getElementById("statusLine");
-            const box = isDark ? "bg-[#25284d] border-[#3a3f7a]" : "bg-white border-slate-200";
+            const box = isDark ? "bg-[#25284d] border-[#3a3f7a]" : "bg-white border-amber-200";
             line.classList.add("hidden");
             card.classList.add("hidden");
             card.innerHTML = "";
@@ -771,30 +794,49 @@
             const days = weekData.days;
             const todayData = days.find(d => d.date === today) || { events: [] };
 
+            // Render Eventi di Oggi (Con stile Pop se in modalità giorno)
             if (todayData.events.length > 0) {
-                todayData.events.forEach(e => {
+                todayData.events.forEach((e, index) => {
                     const isPast = !e.allDay && e.startMs < nowMs;
                     const timeLabel = e.allDay
                         ? '<div class="text-indigo-400 font-bold text-sm w-16 leading-tight shrink-0">Tutto il giorno</div>'
-                        : `<div class="text-indigo-400 font-bold text-lg w-16 shrink-0">${esc(e.time)}</div>`;
+                        : `<div class="${isDark ? 'text-indigo-400' : 'text-amber-700'} font-bold text-lg w-16 shrink-0">${esc(e.time)}</div>`;
                     const where = e.location ? `<p class="text-xs opacity-60 truncate">${esc(e.location)}</p>` : "";
 
-                    todayList.innerHTML += `
-                        <div class="flex items-center gap-4 p-4 rounded-3xl border-2 ${isDark ? "bg-[#25284d] border-[#3a3f7a]" : "bg-white border-slate-200"} shadow-md w-full">
-                            ${timeLabel}
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-lg truncate">${esc(e.title)}</p>
-                                ${where}
-                            </div>
-                            <button class="${isPast ? "text-emerald-500" : "text-slate-500"} transition-colors shrink-0">
-                                <i data-lucide="${isPast ? "check-circle" : "circle"}" class="w-7 h-7"></i>
-                            </button>
-                        </div>`;
+                    // Se è giorno e siamo sul primo impegno, stile "Card Pop in evidenza" (ispirato all'immagine)
+                    if (!isDark && index === 0) {
+                        todayList.innerHTML += `
+                            <div class="p-6 rounded-3xl border-2 bg-gradient-to-br from-amber-300 via-yellow-300 to-amber-400 border-amber-500 shadow-xl space-y-3 w-full text-slate-900">
+                                <div class="flex justify-between items-center">
+                                    <span class="px-3 py-1 bg-slate-900 text-amber-300 rounded-full text-xs font-extrabold uppercase tracking-wider">🔥 Fai subito questo</span>
+                                    <span class="text-xs font-bold text-slate-800">${e.allDay ? 'Tutto il giorno' : esc(e.time)}</span>
+                                </div>
+                                <h3 class="text-2xl font-black tracking-tight">${esc(e.title)}</h3>
+                                ${where ? `<p class="text-xs opacity-80">${where}</p>` : ''}
+                            </div>`;
+                    } else {
+                        const cardStyle = isDark 
+                            ? "bg-[#25284d] border-[#3a3f7a]" 
+                            : "bg-white border-amber-200 shadow-sm";
+
+                        todayList.innerHTML += `
+                            <div class="flex items-center gap-4 p-4 rounded-3xl border-2 ${cardStyle} shadow-md w-full">
+                                ${timeLabel}
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-lg truncate">${esc(e.title)}</p>
+                                    ${where}
+                                </div>
+                                <button class="${isPast ? "text-emerald-500" : "text-slate-500"} transition-colors shrink-0">
+                                    <i data-lucide="${isPast ? "check-circle" : "circle"}" class="w-7 h-7"></i>
+                                </button>
+                            </div>`;
+                    }
                 });
             } else {
                 todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic">Nessun appuntamento per oggi. Relax! ✨</div>';
             }
 
+            // Griglia Prossimi Giorni (mantiene lo storico settimanale completo)
             const nextDays = days.filter(d => d.date !== today);
 
             nextDays.forEach((day, i) => {
@@ -803,7 +845,13 @@
                 const dayName = date.toLocaleDateString("it-IT", { weekday: "short", timeZone: "UTC" }).toUpperCase();
                 const fullDayName = date.toLocaleDateString("it-IT", { weekday: "long", timeZone: "UTC" });
                 const diff = dayDiff(today, day.date);
-                const relLabel = diff === 1 ? "Domani" : `Tra ${diff} giorni`;
+                
+                let relLabel = "";
+                if (diff === 1) relLabel = "Domani";
+                else if (diff === -1) relLabel = "Ieri";
+                else if (diff < -1) relLabel = `Passato (${Math.abs(diff)}gg fa)`;
+                else relLabel = `Tra ${diff} giorni`;
+
                 const count = day.events.length;
                 const countLabel = count === 1 ? "1 impegno" : `${count} impegni`;
 
@@ -816,19 +864,19 @@
                         : '';
                     
                     weatherHtml = `
-                        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800/50 border border-slate-700/40 text-xs font-semibold">
+                        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl ${isDark ? 'bg-slate-800/50 border-slate-700/40 text-slate-200' : 'bg-amber-100/60 border-amber-200 text-slate-800'} border text-xs font-semibold">
                             <i data-lucide="${wDetails.iconName}" class="w-3.5 h-3.5 ${wDetails.iconColor} shrink-0"></i>
-                            <span class="text-slate-200 truncate">${wDetails.label}</span>
+                            <span class="truncate">${wDetails.label}</span>
                             ${tempDisplay}
                         </div>`;
                 }
 
-                const cardBg = isDark ? "bg-[#25284d] border-[#3a3f7a]" : "bg-white border-slate-200";
+                const cardBg = isDark ? "bg-[#25284d] border-[#3a3f7a]" : "bg-white border-amber-200 shadow-sm";
 
                 const eventsHtml = count > 0
                     ? day.events.map(e => `
-                        <div class="group flex items-center gap-3 p-3 rounded-2xl transition-all ${isDark ? "hover:bg-slate-700/50" : "hover:bg-slate-100"}">
-                            <i data-lucide="circle" class="w-5 h-5 text-indigo-400 shrink-0"></i>
+                        <div class="group flex items-center gap-3 p-3 rounded-2xl transition-all ${isDark ? "hover:bg-slate-700/50" : "hover:bg-amber-50"}">
+                            <i data-lucide="circle" class="w-5 h-5 ${isDark ? 'text-indigo-400' : 'text-amber-600'} shrink-0"></i>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-semibold truncate">${esc(e.title)}</p>
                                 <p class="text-xs opacity-60 truncate">${e.allDay ? "Tutto il giorno" : esc(e.time)}</p>
