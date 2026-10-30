@@ -24,9 +24,7 @@
             max-width: 100vw;
             box-sizing: border-box;
         }
-        *, *:before, *:after {
-            box-sizing: border-box;
-        }
+        *, *:before, *:after { box-sizing: border-box; }
         .header-safe-strip {
             height: max(env(safe-area-inset-top, 50px), 60px);
             background: linear-gradient(135deg, #101226 0%, #1a1c2e 40%, #312e81 80%, #6366f1 100%);
@@ -604,18 +602,54 @@
             }
 
             list.forEach((item) => {
-                container.innerHTML += `
-                    <div class="flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-slate-800/60' : 'bg-slate-100'} gap-2">
-                        <div class="flex items-center gap-3 min-w-0 flex-1">
-                            <i data-lucide="circle" class="w-5 h-5 text-indigo-400 shrink-0"></i>
-                            <span class="text-sm truncate">${esc(item.text)}</span>
-                        </div>
-                        <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors shrink-0" title="Elimina">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>`;
+                const isCompleted = item.completed || false;
+                
+                // Per Note Rapide non serve la spunta, solo testo e cestino
+                if (currentListType === "notes") {
+                    container.innerHTML += `
+                        <div class="flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-slate-800/60' : 'bg-slate-100'} gap-2">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <i data-lucide="sticky-note" class="w-5 h-5 text-amber-400 shrink-0"></i>
+                                <span class="text-sm truncate">${esc(item.text)}</span>
+                            </div>
+                            <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors shrink-0" title="Elimina">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>`;
+                } else {
+                    // Per Todo e Shopping: Icona spuntabile verde e testo barrato se completato
+                    const iconName = isCompleted ? "check-circle" : "circle";
+                    const iconColor = isCompleted ? "text-emerald-500" : "text-indigo-400 hover:text-emerald-400";
+                    const textStyle = isCompleted ? "line-through opacity-50" : "";
+
+                    container.innerHTML += `
+                        <div class="flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-slate-800/60' : 'bg-slate-100'} gap-2">
+                            <div class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer" onclick="toggleItemComplete('${item.id}', ${!isCompleted})">
+                                <i data-lucide="${iconName}" class="w-5 h-5 ${iconColor} shrink-0 transition-colors"></i>
+                                <span class="text-sm truncate ${textStyle}">${esc(item.text)}</span>
+                            </div>
+                            <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors shrink-0" title="Elimina">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>`;
+                }
             });
             lucide.createIcons();
+        }
+
+        async function toggleItemComplete(itemId, newStatus) {
+            try {
+                const res = await fetch(`${WORKER_URL}?action=toggleItem&id=${itemId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ completed: newStatus })
+                });
+                if (!res.ok) throw new Error("Errore aggiornamento");
+                await loadWeek();
+                renderListItems();
+            } catch (err) {
+                alert("Impossibile aggiornare l'elemento.");
+            }
         }
 
         async function addItemToCloud() {
