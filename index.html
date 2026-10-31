@@ -26,7 +26,7 @@
         }
         *, *:before, *:after { box-sizing: border-box; }
         
-        /* Barra superiore fissa con gestione corretta della Safe Area e Notch */
+        /* Barra superiore fissa sotto la Dynamic Island */
         .header-fixed-notch {
             position: fixed;
             top: 0;
@@ -35,21 +35,23 @@
             z-index: 50;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            padding-top: max(env(safe-area-inset-top, 24px), 16px);
+            /* Aggiungiamo un padding superiore generico per staccarla nettamente dalla Dynamic Island */
+            padding-top: max(env(safe-area-inset-top, 36px), 32px);
+            padding-bottom: 12px;
             transition: background 0.3s, border-color 0.3s;
         }
         .header-dark {
-            background: rgba(26, 28, 46, 0.9);
+            background: rgba(26, 28, 46, 0.92);
             border-bottom: 1px solid rgba(165, 180, 252, 0.15);
         }
         .header-light {
-            background: rgba(254, 240, 138, 0.9);
+            background: rgba(254, 240, 138, 0.92);
             border-bottom: 1px solid rgba(234, 179, 8, 0.25);
         }
 
-        /* Spaziatore dinamico per impedire la sovrapposizione dei contenuti sotto la barra fissa */
+        /* Spaziatore per i contenuti sotto la barra fissa */
         .content-spacer {
-            height: calc(max(env(safe-area-inset-top, 24px), 16px) + 58px);
+            height: calc(max(env(safe-area-inset-top, 36px), 32px) + 68px);
         }
 
         .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px); }
@@ -62,8 +64,8 @@
 </head>
 <body id="bodyRoot" class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <!-- Barra Superiore Fissa (Ancorata sopra il notch, i contenuti scorrono sotto) -->
-    <div id="headerContainer" class="header-fixed-notch header-dark w-full px-4 md:px-8 pb-3 shadow-lg">
+    <!-- Barra Superiore Fissa con spazio di sicurezza sotto la Dynamic Island -->
+    <div id="headerContainer" class="header-fixed-notch header-dark w-full px-4 md:px-8 shadow-lg">
         <div class="max-w-4xl mx-auto flex justify-between items-center gap-2 w-full">
             <div class="flex items-center gap-2.5 shrink-0 min-w-0">
                 <div id="appLogoBox" class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
@@ -162,7 +164,7 @@
         </div>
     </div>
 
-    <!-- Spaziatore dinamico -->
+    <!-- Spaziatore dinamico corretto -->
     <div class="content-spacer"></div>
 
     <!-- Contenuto Principale Scorrevole sotto la barra -->
@@ -635,7 +637,7 @@
 
             if (isDark) {
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
-                headerContainer.className = "header-fixed-notch header-dark w-full px-4 md:px-8 pb-3 shadow-lg";
+                headerContainer.className = "header-fixed-notch header-dark w-full px-4 md:px-8 shadow-lg";
                 appLogoBox.className = "w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0";
                 appFocusTag.className = "text-xs font-extrabold uppercase tracking-wider text-indigo-400";
                 todayBar.className = "h-1 w-8 bg-indigo-500 rounded-full shrink-0";
@@ -649,7 +651,7 @@
                 btn.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
             } else {
                 body.className = "bg-amber-50 text-slate-900 min-h-screen flex flex-col";
-                headerContainer.className = "header-fixed-notch header-light w-full px-4 md:px-8 pb-3 shadow-md";
+                headerContainer.className = "header-fixed-notch header-light w-full px-4 md:px-8 shadow-md";
                 appLogoBox.className = "w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-white shrink-0";
                 appFocusTag.className = "text-xs font-extrabold uppercase tracking-wider text-amber-700";
                 todayBar.className = "h-1 w-8 bg-amber-500 rounded-full shrink-0";
