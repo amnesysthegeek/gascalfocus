@@ -26,7 +26,7 @@
         }
         *, *:before, *:after { box-sizing: border-box; }
         
-        /* Barra Superiore Stile Dynamic Island con Sfumatura Fumettosa Pop */
+        /* Barra Superiore Stile Dynamic Island ribassata per evitare il notch/sfocatura */
         .header-fixed-notch {
             position: fixed;
             top: 0;
@@ -35,25 +35,33 @@
             z-index: 50;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            padding-top: max(env(safe-area-inset-top, 44px), 40px);
+            padding-top: max(env(safe-area-inset-top, 50px), 48px);
             padding-bottom: 12px;
             transition: all 0.3s ease;
         }
 
         .header-dark-pop {
-            background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(76, 29, 149, 0.9) 45%, rgba(15, 23, 42, 0.95) 100%);
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.96) 0%, rgba(76, 29, 149, 0.92) 45%, rgba(15, 23, 42, 0.96) 100%);
             border-bottom: 2px solid rgba(244, 63, 94, 0.4);
             box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.5);
         }
 
         .header-light-pop {
-            background: linear-gradient(135deg, rgba(254, 240, 138, 0.95) 0%, rgba(251, 146, 60, 0.9) 50%, rgba(244, 63, 94, 0.9) 100%);
+            background: linear-gradient(135deg, rgba(254, 240, 138, 0.96) 0%, rgba(251, 146, 60, 0.92) 50%, rgba(244, 63, 94, 0.92) 100%);
             border-bottom: 2px solid rgba(234, 179, 8, 0.5);
             box-shadow: 0 10px 30px -10px rgba(251, 146, 60, 0.4);
         }
 
+        /* Spaziatore dinamico per far scorrere i contenuti perfettamente sotto */
         .content-spacer {
-            height: calc(max(env(safe-area-inset-top, 44px), 40px) + 72px);
+            height: calc(max(env(safe-area-inset-top, 50px), 48px) + 76px);
+        }
+
+        /* Regole di sicurezza per impedire ai menu a tendina di uscire dallo schermo */
+        .dropdown-safe {
+            max-height: 65vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px); }
@@ -78,22 +86,22 @@
                     <span id="appFocusTag" class="text-xs font-black uppercase tracking-wider text-amber-300 drop-shadow">Focus ✨</span>
                 </div>
                 
-                <!-- Widget Meteo Interattivo -->
+                <!-- Widget Meteo Interattivo (Funzione Dynamic Island integrata) -->
                 <div class="relative ml-1 shrink-0">
                     <button onclick="toggleWeatherMenu()" id="weatherBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/40 border border-white/20 text-xs font-bold hover:bg-black/60 transition-all shadow-md">
                         <i data-lucide="cloud-sun" class="w-4 h-4 text-amber-400 shrink-0 animate-pulse" id="weatherIcon"></i>
                         <span id="weatherTemp" class="text-white font-black">--°C</span>
                     </button>
-                    <!-- Menu Previsioni Meteo Esteso a 10 Giorni -->
-                    <div id="weatherMenu" class="hidden absolute left-0 mt-3 w-72 max-w-[90vw] rounded-3xl p-4 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-3 backdrop-blur-xl">
-                        <div class="border-b border-white/10 pb-2.5 flex justify-between items-center">
+                    <!-- Menu Previsioni Meteo Esteso a 10 Giorni (Riquadrato e sicuro) -->
+                    <div id="weatherMenu" class="hidden absolute left-0 mt-3 w-72 max-w-[90vw] rounded-3xl p-4 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-3 backdrop-blur-xl dropdown-safe">
+                        <div class="border-b border-white/10 pb-2.5 flex justify-between items-center sticky top-0 bg-[#1e1b4b] z-10">
                             <div class="min-w-0 pr-2">
                                 <span class="font-black text-sm block text-amber-300">Previsioni 10 Giorni ☀️</span>
                                 <span id="weatherLocationName" class="text-[10px] text-indigo-200 font-medium truncate block">Rilevamento posizione...</span>
                             </div>
                             <i data-lucide="map-pin" class="w-4 h-4 text-rose-400 shrink-0"></i>
                         </div>
-                        <div id="weatherForecastList" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                        <div id="weatherForecastList" class="space-y-2 pr-1">
                             <div class="text-center opacity-50 py-3">Caricamento previsioni meteo...</div>
                         </div>
                     </div>
@@ -116,7 +124,7 @@
                         <i data-lucide="bell" class="w-4 h-4" id="bellIcon"></i>
                         <span id="alarmBadge" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-indigo-950"></span>
                     </button>
-                    <div id="alarmMenu" class="hidden absolute right-0 mt-3 w-64 max-w-[90vw] rounded-3xl p-4 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-sm space-y-3 backdrop-blur-xl">
+                    <div id="alarmMenu" class="hidden absolute right-0 mt-3 w-64 max-w-[90vw] rounded-3xl p-4 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-sm space-y-3 backdrop-blur-xl dropdown-safe">
                         <div class="font-bold border-b border-white/10 pb-2 flex justify-between items-center text-amber-300">
                             <span>Promemoria & Avvisi</span>
                             <i data-lucide="bell-ring" class="w-4 h-4 text-amber-400"></i>
@@ -149,7 +157,7 @@
                         <span id="listLabel" class="hidden sm:inline">Liste</span>
                         <i data-lucide="chevron-right" class="w-4 h-4 transition-transform shrink-0" id="chevron"></i>
                     </button>
-                    <div id="listMenu" class="hidden absolute right-0 mt-3 w-48 max-w-[90vw] rounded-3xl p-2 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 backdrop-blur-xl">
+                    <div id="listMenu" class="hidden absolute right-0 mt-3 w-48 max-w-[90vw] rounded-3xl p-2 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 backdrop-blur-xl dropdown-safe">
                         <button onclick="openList('todo')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium">
                             <i data-lucide="list-todo" class="w-4 h-4 text-indigo-400 shrink-0"></i> Cose da fare
                         </button>
