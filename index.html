@@ -14,7 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         html, body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
@@ -26,32 +26,34 @@
         }
         *, *:before, *:after { box-sizing: border-box; }
         
-        /* Barra superiore fissa sotto la Dynamic Island */
+        /* Barra Superiore Stile Dynamic Island con Sfumatura Fumettosa Pop */
         .header-fixed-notch {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 50;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            /* Aggiungiamo un padding superiore generico per staccarla nettamente dalla Dynamic Island */
-            padding-top: max(env(safe-area-inset-top, 36px), 32px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding-top: max(env(safe-area-inset-top, 44px), 40px);
             padding-bottom: 12px;
-            transition: background 0.3s, border-color 0.3s;
-        }
-        .header-dark {
-            background: rgba(26, 28, 46, 0.92);
-            border-bottom: 1px solid rgba(165, 180, 252, 0.15);
-        }
-        .header-light {
-            background: rgba(254, 240, 138, 0.92);
-            border-bottom: 1px solid rgba(234, 179, 8, 0.25);
+            transition: all 0.3s ease;
         }
 
-        /* Spaziatore per i contenuti sotto la barra fissa */
+        .header-dark-pop {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(76, 29, 149, 0.9) 45%, rgba(15, 23, 42, 0.95) 100%);
+            border-bottom: 2px solid rgba(244, 63, 94, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.5);
+        }
+
+        .header-light-pop {
+            background: linear-gradient(135deg, rgba(254, 240, 138, 0.95) 0%, rgba(251, 146, 60, 0.9) 50%, rgba(244, 63, 94, 0.9) 100%);
+            border-bottom: 2px solid rgba(234, 179, 8, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(251, 146, 60, 0.4);
+        }
+
         .content-spacer {
-            height: calc(max(env(safe-area-inset-top, 36px), 32px) + 68px);
+            height: calc(max(env(safe-area-inset-top, 44px), 40px) + 72px);
         }
 
         .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px); }
@@ -64,35 +66,35 @@
 </head>
 <body id="bodyRoot" class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <!-- Barra Superiore Fissa con spazio di sicurezza sotto la Dynamic Island -->
-    <div id="headerContainer" class="header-fixed-notch header-dark w-full px-4 md:px-8 shadow-lg">
+    <!-- Barra Superiore Dynamic Island Fissa -->
+    <div id="headerContainer" class="header-fixed-notch header-dark-pop w-full px-4 md:px-8">
         <div class="max-w-4xl mx-auto flex justify-between items-center gap-2 w-full">
             <div class="flex items-center gap-2.5 shrink-0 min-w-0">
-                <div id="appLogoBox" class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
-                    <i data-lucide="calendar" class="text-white w-6 h-6"></i>
+                <div id="appLogoBox" class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-xl border border-white/20">
+                    <i data-lucide="calendar" class="text-white w-5 h-5"></i>
                 </div>
                 <div class="flex flex-col leading-tight min-w-0">
-                    <h1 class="text-base font-bold tracking-tight truncate">GasCalendar</h1>
-                    <span id="appFocusTag" class="text-xs font-extrabold uppercase tracking-wider text-indigo-400">Focus</span>
+                    <h1 class="text-base font-black tracking-tight truncate drop-shadow">GasCalendar</h1>
+                    <span id="appFocusTag" class="text-xs font-black uppercase tracking-wider text-amber-300 drop-shadow">Focus ✨</span>
                 </div>
                 
-                <!-- Widget Meteo Cliccabile -->
+                <!-- Widget Meteo Interattivo -->
                 <div class="relative ml-1 shrink-0">
-                    <button onclick="toggleWeatherMenu()" id="weatherBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold hover:bg-slate-700 transition-colors">
-                        <i data-lucide="cloud-sun" class="w-4 h-4 text-amber-400 shrink-0" id="weatherIcon"></i>
-                        <span id="weatherTemp" class="text-slate-200">--°C</span>
+                    <button onclick="toggleWeatherMenu()" id="weatherBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/40 border border-white/20 text-xs font-bold hover:bg-black/60 transition-all shadow-md">
+                        <i data-lucide="cloud-sun" class="w-4 h-4 text-amber-400 shrink-0 animate-pulse" id="weatherIcon"></i>
+                        <span id="weatherTemp" class="text-white font-black">--°C</span>
                     </button>
-                    <!-- Menu Previsioni Meteo Esteso -->
-                    <div id="weatherMenu" class="hidden absolute left-0 mt-2 w-64 max-w-[90vw] rounded-2xl p-4 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a] text-xs space-y-3">
-                        <div class="border-b border-slate-700 pb-2 flex justify-between items-center">
+                    <!-- Menu Previsioni Meteo Esteso a 10 Giorni -->
+                    <div id="weatherMenu" class="hidden absolute left-0 mt-3 w-72 max-w-[90vw] rounded-3xl p-4 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-3 backdrop-blur-xl">
+                        <div class="border-b border-white/10 pb-2.5 flex justify-between items-center">
                             <div class="min-w-0 pr-2">
-                                <span class="font-bold text-sm block">Previsioni Meteo</span>
-                                <span id="weatherLocationName" class="text-[10px] text-indigo-300 font-medium truncate block">Rilevamento posizione...</span>
+                                <span class="font-black text-sm block text-amber-300">Previsioni 10 Giorni ☀️</span>
+                                <span id="weatherLocationName" class="text-[10px] text-indigo-200 font-medium truncate block">Rilevamento posizione...</span>
                             </div>
-                            <i data-lucide="map-pin" class="w-4 h-4 text-indigo-400 shrink-0"></i>
+                            <i data-lucide="map-pin" class="w-4 h-4 text-rose-400 shrink-0"></i>
                         </div>
-                        <div id="weatherForecastList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
-                            <div class="text-center opacity-50 py-2">Caricamento previsioni...</div>
+                        <div id="weatherForecastList" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                            <div class="text-center opacity-50 py-3">Caricamento previsioni meteo...</div>
                         </div>
                     </div>
                 </div>
@@ -100,28 +102,28 @@
 
             <!-- Gruppo Pulsanti (Destra) -->
             <div class="flex items-center gap-1.5 md:gap-2 shrink-0">
-                <button id="themeToggle" aria-label="Cambia tema" class="p-2 rounded-full bg-slate-700 text-amber-400 hover:bg-slate-600 transition-colors shrink-0">
-                    <i data-lucide="sun" class="w-5 h-5"></i>
+                <button id="themeToggle" aria-label="Cambia tema" class="p-2.5 rounded-2xl bg-black/30 border border-white/15 text-amber-300 hover:bg-black/50 transition-colors shrink-0 shadow-md">
+                    <i data-lucide="sun" class="w-4 h-4"></i>
                 </button>
 
-                <button id="refreshBtn" aria-label="Aggiorna" class="p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors shrink-0">
-                    <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                <button id="refreshBtn" aria-label="Aggiorna" class="p-2.5 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 transition-colors shrink-0 shadow-md">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                 </button>
 
                 <!-- Campanella Promemoria -->
                 <div class="relative shrink-0">
-                    <button id="alarmBtn" onclick="toggleAlarmMenu()" class="p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors relative" title="Imposta Promemoria">
-                        <i data-lucide="bell" class="w-5 h-5" id="bellIcon"></i>
-                        <span id="alarmBadge" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-indigo-500 rounded-full ring-2 ring-[#1a1c2e]"></span>
+                    <button id="alarmBtn" onclick="toggleAlarmMenu()" class="p-2.5 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 transition-colors relative shadow-md" title="Imposta Promemoria">
+                        <i data-lucide="bell" class="w-4 h-4" id="bellIcon"></i>
+                        <span id="alarmBadge" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-indigo-950"></span>
                     </button>
-                    <div id="alarmMenu" class="hidden absolute right-0 mt-2 w-64 max-w-[90vw] rounded-2xl p-4 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a] text-sm space-y-3">
-                        <div class="font-bold border-b border-slate-700 pb-2 flex justify-between items-center">
+                    <div id="alarmMenu" class="hidden absolute right-0 mt-3 w-64 max-w-[90vw] rounded-3xl p-4 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-sm space-y-3 backdrop-blur-xl">
+                        <div class="font-bold border-b border-white/10 pb-2 flex justify-between items-center text-amber-300">
                             <span>Promemoria & Avvisi</span>
-                            <i data-lucide="bell-ring" class="w-4 h-4 text-indigo-400"></i>
+                            <i data-lucide="bell-ring" class="w-4 h-4 text-amber-400"></i>
                         </div>
                         <div>
                             <label class="block text-xs opacity-70 mb-1">Anticipo avviso:</label>
-                            <select id="alarmOffset" onchange="saveAlarmSettings()" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2 text-white text-xs focus:outline-none focus:border-indigo-500">
+                            <select id="alarmOffset" onchange="saveAlarmSettings()" class="w-full bg-slate-900 border border-white/20 rounded-xl p-2 text-white text-xs focus:outline-none focus:border-indigo-400">
                                 <option value="0">Esattamente all'orario</option>
                                 <option value="5">5 minuti prima</option>
                                 <option value="10" selected>10 minuti prima</option>
@@ -132,9 +134,9 @@
                         </div>
                         <div class="flex items-center justify-between pt-1">
                             <span>Attiva suoni</span>
-                            <input type="checkbox" id="alarmSound" checked onchange="saveAlarmSettings()" class="w-4 h-4 accent-indigo-600 rounded cursor-pointer">
+                            <input type="checkbox" id="alarmSound" checked onchange="saveAlarmSettings()" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
                         </div>
-                        <button onclick="requestNotificationPermission()" class="w-full py-2 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 rounded-xl text-xs font-semibold transition-colors">
+                        <button onclick="requestNotificationPermission()" class="w-full py-2 bg-gradient-to-r from-indigo-600 to-rose-600 text-white rounded-xl text-xs font-bold shadow-lg transition-all">
                             Abilita Notifiche Telefono
                         </button>
                     </div>
@@ -142,37 +144,39 @@
 
                 <!-- Menu Liste -->
                 <div class="relative shrink-0">
-                    <button id="listBtn" onclick="toggleMenu()" class="flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-full font-medium transition-all bg-slate-700 text-slate-200 hover:bg-slate-600 text-sm">
-                        <i data-lucide="list-todo" class="w-4 h-4 shrink-0"></i>
+                    <button id="listBtn" onclick="toggleMenu()" class="flex items-center gap-1.5 px-3.5 py-2 md:px-4 md:py-2 rounded-2xl font-bold transition-all bg-black/30 border border-white/15 text-white hover:bg-black/50 text-sm shadow-md">
+                        <i data-lucide="list-todo" class="w-4 h-4 shrink-0 text-amber-300"></i>
                         <span id="listLabel" class="hidden sm:inline">Liste</span>
                         <i data-lucide="chevron-right" class="w-4 h-4 transition-transform shrink-0" id="chevron"></i>
                     </button>
-                    <div id="listMenu" class="hidden absolute right-0 mt-2 w-48 max-w-[90vw] rounded-2xl p-2 z-50 border shadow-2xl bg-[#25284d] border-[#3a3f7a]">
-                        <button onclick="openList('todo')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors text-left hover:bg-indigo-600/30 text-slate-200">
+                    <div id="listMenu" class="hidden absolute right-0 mt-3 w-48 max-w-[90vw] rounded-3xl p-2 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 backdrop-blur-xl">
+                        <button onclick="openList('todo')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium">
                             <i data-lucide="list-todo" class="w-4 h-4 text-indigo-400 shrink-0"></i> Cose da fare
                         </button>
-                        <button onclick="openList('shopping')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors text-left hover:bg-indigo-600/30 text-slate-200">
+                        <button onclick="openList('shopping')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium">
                             <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-400 shrink-0"></i> Lista Spesa
                         </button>
-                        <button onclick="openList('notes')" class="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors text-left hover:bg-indigo-600/30 text-slate-200">
+                        <button onclick="openList('notes')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium">
                             <i data-lucide="sticky-note" class="w-4 h-4 text-amber-400 shrink-0"></i> Note Rapide
                         </button>
-                        <button onclick="toggleMenu()" class="w-full text-center mt-2 py-1 text-xs text-slate-400 hover:text-indigo-400 transition-colors">Chiudi</button>
+                        <button onclick="toggleMenu()" class="w-full text-center mt-2 py-1.5 text-xs text-indigo-300 hover:text-white transition-colors">Chiudi</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Spaziatore dinamico corretto -->
+    <!-- Spaziatore dinamico -->
     <div class="content-spacer"></div>
 
-    <!-- Contenuto Principale Scorrevole sotto la barra -->
+    <!-- Contenuto Principale Scorrevole -->
     <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full overflow-x-hidden space-y-8">
-        <div class="space-y-4">
-            <h2 id="greeting" class="text-4xl md:text-6xl font-extrabold tracking-tight break-words">Caricamento...</h2>
-            <div class="flex items-center gap-2 text-lg font-medium opacity-80">
-                <i data-lucide="calendar" class="text-indigo-400 w-5 h-5 shrink-0" id="dateCalendarIcon"></i>
+        <div class="space-y-3">
+            <h2 id="greeting" class="text-4xl md:text-6xl font-black tracking-tight break-words">Caricamento...</h2>
+            <!-- Commento spiritoso dinamico -->
+            <p id="funnyJoke" class="text-sm md:text-base font-semibold text-amber-400 italic opacity-90"></p>
+            <div class="flex items-center gap-2 text-lg font-semibold opacity-90 pt-1">
+                <i data-lucide="calendar" class="text-amber-400 w-5 h-5 shrink-0" id="dateCalendarIcon"></i>
                 <span id="currentDate" class="truncate"></span>
             </div>
             <p id="statusLine" class="hidden text-sm opacity-60"></p>
@@ -181,17 +185,17 @@
         <div id="statusCard" class="hidden"></div>
 
         <!-- Modal Pop-up Notifica Evento in arrivo -->
-        <div id="alarmPopup" class="hidden p-5 rounded-3xl border-2 bg-indigo-950/90 border-indigo-500 shadow-2xl flex items-center justify-between animate-pulse gap-3">
+        <div id="alarmPopup" class="hidden p-5 rounded-3xl border-2 bg-indigo-950/95 border-amber-500 shadow-2xl flex items-center justify-between animate-pulse gap-3">
             <div class="flex items-center gap-3 min-w-0">
-                <div class="p-3 bg-indigo-600 rounded-2xl text-white shrink-0">
+                <div class="p-3 bg-amber-500 rounded-2xl text-slate-950 shrink-0 font-bold">
                     <i data-lucide="bell-ring" class="w-6 h-6"></i>
                 </div>
                 <div class="min-w-0">
-                    <p class="text-xs uppercase font-bold text-indigo-300 tracking-wider">Promemoria Evento</p>
+                    <p class="text-xs uppercase font-black text-amber-400 tracking-wider">Promemoria Evento</p>
                     <h4 id="alarmPopupTitle" class="text-lg font-bold truncate">Titolo Evento</h4>
                 </div>
             </div>
-            <button onclick="dismissAlarmPopup()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-500 transition-colors shrink-0">
+            <button onclick="dismissAlarmPopup()" class="px-4 py-2 bg-amber-500 text-slate-950 rounded-xl text-sm font-black hover:bg-amber-400 transition-colors shrink-0 shadow-lg">
                 Ho capito
             </button>
         </div>
@@ -199,10 +203,10 @@
         <div id="todayFocus" class="space-y-4">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
-                    <div id="todayBar" class="h-1 w-8 bg-indigo-500 rounded-full shrink-0"></div>
-                    <span id="todayTitleText" class="text-sm font-bold uppercase tracking-widest text-indigo-400">Appuntamenti di Oggi</span>
+                    <div id="todayBar" class="h-1.5 w-8 bg-amber-400 rounded-full shrink-0"></div>
+                    <span id="todayTitleText" class="text-sm font-black uppercase tracking-widest text-amber-400">Appuntamenti di Oggi</span>
                 </div>
-                <button onclick="openAddEventModal(romeToday())" class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 text-xs font-semibold transition-colors">
+                <button onclick="openAddEventModal(romeToday())" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-black transition-colors border border-amber-500/30">
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i> Aggiungi
                 </button>
             </div>
@@ -211,8 +215,8 @@
 
         <div class="space-y-4">
             <div class="flex items-center gap-2 mb-2">
-                <div class="h-1 w-8 bg-slate-500 rounded-full shrink-0"></div>
-                <span class="text-sm font-bold uppercase tracking-widest opacity-60">Prossimi 6 Giorni</span>
+                <div class="h-1.5 w-8 bg-indigo-400 rounded-full shrink-0"></div>
+                <span class="text-sm font-black uppercase tracking-widest opacity-80">Prossimi 6 Giorni</span>
             </div>
             <div id="calendarGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
@@ -220,27 +224,27 @@
 
     <!-- Modal Aggiungi Evento a Data Specifica -->
     <div id="addEventModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-        <div class="w-full max-w-md rounded-3xl overflow-hidden bg-[#25284d] border border-[#3a3f7a] shadow-2xl p-6 space-y-4 animate-slide-up text-white">
-            <div class="flex justify-between items-center border-b border-slate-700/50 pb-3">
-                <h3 class="text-lg font-bold flex items-center gap-2">
-                    <i data-lucide="calendar-plus" class="w-5 h-5 text-indigo-400"></i> Aggiungi Impegno
+        <div class="w-full max-w-md rounded-3xl overflow-hidden bg-[#1e1b4b] border border-indigo-500/40 shadow-2xl p-6 space-y-4 animate-slide-up text-white">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                <h3 class="text-lg font-black flex items-center gap-2 text-amber-300">
+                    <i data-lucide="calendar-plus" class="w-5 h-5 text-amber-400"></i> Aggiungi Impegno
                 </h3>
-                <button onclick="closeAddEventModal()" class="p-1.5 hover:bg-slate-700/50 rounded-full transition-colors">
+                <button onclick="closeAddEventModal()" class="p-1.5 hover:bg-white/10 rounded-full transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
             <div class="space-y-3">
                 <div>
-                    <label class="block text-xs opacity-70 mb-1">Data selezionata:</label>
-                    <input type="date" id="modalEventDate" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
+                    <label class="block text-xs opacity-70 mb-1 font-semibold">Data selezionata:</label>
+                    <input type="date" id="modalEventDate" class="w-full bg-slate-900 border border-white/20 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-amber-400 font-medium">
                 </div>
                 <div>
-                    <label class="block text-xs opacity-70 mb-1">Titolo impegno / promemoria:</label>
-                    <input type="text" id="modalEventTitle" placeholder="Es. Visita medica, Riunione..." class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500" onkeypress="if(event.key==='Enter') submitAddEventModal()">
+                    <label class="block text-xs opacity-70 mb-1 font-semibold">Titolo impegno / promemoria:</label>
+                    <input type="text" id="modalEventTitle" placeholder="Es. Visita medica, Riunione..." class="w-full bg-slate-900 border border-white/20 rounded-xl p-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 font-medium" onkeypress="if(event.key==='Enter') submitAddEventModal()">
                 </div>
                 <div class="flex gap-2 pt-2">
-                    <button onclick="closeAddEventModal()" class="flex-1 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-sm font-semibold transition-colors">Annulla</button>
-                    <button onclick="submitAddEventModal()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/30 transition-all">Salva</button>
+                    <button onclick="closeAddEventModal()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition-colors">Annulla</button>
+                    <button onclick="submitAddEventModal()" class="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-slate-950 rounded-xl text-sm font-black shadow-lg transition-all">Salva</button>
                 </div>
             </div>
         </div>
@@ -248,13 +252,13 @@
 
     <!-- List Overlay -->
     <div id="listOverlay" class="fixed inset-0 z-[100] hidden flex items-end md:items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-        <div id="listCard" class="w-full max-w-lg rounded-t-3xl md:rounded-3xl overflow-hidden bg-[#25284d] border border-[#3a3f7a] shadow-2xl animate-slide-up">
-            <div class="p-5 flex justify-between items-center border-b border-slate-700/50">
+        <div id="listCard" class="w-full max-w-lg rounded-t-3xl md:rounded-3xl overflow-hidden bg-[#1e1b4b] border border-indigo-500/40 shadow-2xl animate-slide-up">
+            <div class="p-5 flex justify-between items-center border-b border-white/10">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div id="listIconBox" class="p-2 bg-indigo-600 rounded-lg text-white shrink-0"></div>
-                    <h3 id="listTitle" class="text-xl font-bold capitalize truncate">Lista</h3>
+                    <div id="listIconBox" class="p-2.5 bg-gradient-to-br from-amber-400 to-rose-500 rounded-2xl text-slate-950 shrink-0 font-black"></div>
+                    <h3 id="listTitle" class="text-xl font-black capitalize truncate text-amber-300">Lista</h3>
                 </div>
-                <button onclick="closeList()" class="p-2 hover:bg-slate-700/50 rounded-full transition-colors shrink-0">
+                <button onclick="closeList()" class="p-2 hover:bg-white/10 rounded-full transition-colors shrink-0">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -263,9 +267,9 @@
                 <div id="listItems" class="space-y-2 max-h-[50vh] overflow-y-auto pr-1"></div>
                 <div class="flex gap-2 pt-2">
                     <input type="text" id="newItemInput" placeholder="Aggiungi una voce..." 
-                        class="flex-1 bg-slate-800/80 border border-slate-600/60 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 text-white placeholder-slate-400 min-w-0"
+                        class="flex-1 bg-slate-900 border border-white/20 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-amber-400 text-white placeholder-slate-400 min-w-0 font-medium"
                         onkeypress="if(event.key==='Enter') addItemToCloud()">
-                    <button onclick="addItemToCloud()" class="px-5 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-500 transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/30 shrink-0">
+                    <button onclick="addItemToCloud()" class="px-5 py-3 bg-gradient-to-r from-amber-400 to-rose-500 text-slate-950 rounded-2xl font-black hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shrink-0">
                         <i data-lucide="plus" class="w-5 h-5"></i>
                     </button>
                 </div>
@@ -295,8 +299,8 @@
         let notifiedEvents = new Set();
 
         const badgeColors = [
-            "bg-rose-500 text-white", "bg-amber-500 text-white", "bg-emerald-500 text-white",
-            "bg-sky-500 text-white", "bg-indigo-500 text-white", "bg-violet-500 text-white", "bg-fuchsia-500 text-white"
+            "bg-rose-500 text-white", "bg-amber-500 text-slate-950", "bg-emerald-500 text-slate-950",
+            "bg-sky-500 text-slate-950", "bg-indigo-500 text-white", "bg-violet-500 text-white", "bg-fuchsia-500 text-white"
         ];
 
         function esc(s) {
@@ -416,7 +420,7 @@
                 label = isDay === 1 ? "Sereno" : "Notte serena";
             } else if (code >= 1 && code <= 3) {
                 iconName = isDay === 1 ? "cloud-sun" : "cloud-moon";
-                iconColor = "text-slate-300";
+                iconColor = "text-amber-200";
                 label = "Nuvoloso";
             } else if (code >= 51 && code <= 67) {
                 iconName = "cloud-rain";
@@ -465,16 +469,16 @@
                 const min = rawDailyData.temperature_2m_min && rawDailyData.temperature_2m_min[i] !== undefined ? Math.round(rawDailyData.temperature_2m_min[i]) : null;
                 const details = getWeatherDetails(code, 1);
 
-                const tempText = (min !== null && max !== null) ? `<span class="font-bold text-indigo-300">${min}° / ${max}°</span>` : '';
+                const tempText = (min !== null && max !== null) ? `<span class="font-black text-amber-300">${min}° / ${max}°</span>` : '';
 
                 container.innerHTML += `
-                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-800/60 gap-2">
-                        <div class="flex items-center gap-2 min-w-0">
+                    <div class="flex items-center justify-between p-2.5 rounded-2xl bg-black/30 border border-white/10 gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0">
                             <i data-lucide="${details.iconName}" class="w-4 h-4 ${details.iconColor} shrink-0"></i>
-                            <span class="capitalize font-medium truncate">${dayName}</span>
+                            <span class="capitalize font-bold text-white truncate">${dayName}</span>
                         </div>
-                        <div class="flex items-center gap-2 opacity-80 shrink-0">
-                            <span>${details.label}</span>
+                        <div class="flex items-center gap-2.5 opacity-90 shrink-0 text-xs">
+                            <span class="text-indigo-200">${details.label}</span>
                             ${tempText}
                         </div>
                     </div>`;
@@ -609,14 +613,30 @@
             const now = new Date();
             const hour = romeHour(now);
             let greet = "Buona notte!";
-            if (hour >= 5 && hour < 11) greet = "Buongiorno!";
-            else if (hour >= 11 && hour < 14) greet = "Buon pranzo!";
-            else if (hour >= 14 && hour < 17) greet = "Buon pomeriggio!";
-            else if (hour >= 17 && hour < 19) greet = "Buon caffè!";
-            else if (hour >= 19 && hour < 21) greet = "Buona cena!";
-            else if (hour >= 21 && hour < 23) greet = "Buona serata!";
+            let joke = "I Pokémon leggendari dormono a quest'ora.";
+            
+            if (hour >= 5 && hour < 11) {
+                greet = "Buongiorno!";
+                joke = "Il caffè è l'unico vero superpotere del mattino. Usalo bene!";
+            } else if (hour >= 11 && hour < 14) {
+                greet = "Buon pranzo!";
+                joke = "Ricorda: la pasta batte sempre lo stress lavorativo.";
+            } else if (hour >= 14 && hour < 17) {
+                greet = "Buon pomeriggio!";
+                joke = "Resisti, la sedia ti vuole bene ma il divano ti ama di più.";
+            } else if (hour >= 17 && hour < 19) {
+                greet = "Buon caffè!";
+                joke = "Un altro caffè e potrò muovermi alla velocità della luce.";
+            } else if (hour >= 19 && hour < 21) {
+                greet = "Buona cena!";
+                joke = "Cena leggera? Ahahah, bella battuta.";
+            } else if (hour >= 21 && hour < 23) {
+                greet = "Buona serata!";
+                joke = "Missione quasi compiuta: ora puoi spegnere il cervello.";
+            }
 
             document.getElementById("greeting").innerText = greet;
+            document.getElementById("funnyJoke").innerText = joke;
             document.getElementById("currentDate").innerText =
                 now.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: TZ });
         }
@@ -637,32 +657,32 @@
 
             if (isDark) {
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
-                headerContainer.className = "header-fixed-notch header-dark w-full px-4 md:px-8 shadow-lg";
-                appLogoBox.className = "w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0";
-                appFocusTag.className = "text-xs font-extrabold uppercase tracking-wider text-indigo-400";
-                todayBar.className = "h-1 w-8 bg-indigo-500 rounded-full shrink-0";
-                todayTitleText.className = "text-sm font-bold uppercase tracking-widest text-indigo-400";
-                dateCalendarIcon.className = "text-indigo-400 w-5 h-5 shrink-0";
+                headerContainer.className = "header-fixed-notch header-dark-pop w-full px-4 md:px-8";
+                appLogoBox.className = "w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-xl border border-white/20";
+                appFocusTag.className = "text-xs font-black uppercase tracking-wider text-amber-300 drop-shadow";
+                todayBar.className = "h-1.5 w-8 bg-amber-400 rounded-full shrink-0";
+                todayTitleText.className = "text-sm font-black uppercase tracking-widest text-amber-400";
+                dateCalendarIcon.className = "text-amber-400 w-5 h-5 shrink-0";
                 
-                btn.className = "p-2 rounded-full bg-slate-700 text-amber-400 hover:bg-slate-600 shrink-0";
-                refresh.className = "p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 shrink-0";
-                alarmBtn.className = "p-2 rounded-full bg-slate-700 text-slate-200 hover:bg-slate-600 relative shrink-0";
-                weatherBtn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold hover:bg-slate-700 transition-colors text-slate-200";
-                btn.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
+                btn.className = "p-2.5 rounded-2xl bg-black/30 border border-white/15 text-amber-300 hover:bg-black/50 shrink-0 shadow-md";
+                refresh.className = "p-2.5 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 shrink-0 shadow-md";
+                alarmBtn.className = "p-2.5 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 relative shrink-0 shadow-md";
+                weatherBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/40 border border-white/20 text-xs font-bold hover:bg-black/60 transition-all text-white shadow-md";
+                btn.innerHTML = '<i data-lucide="sun" class="w-4 h-4"></i>';
             } else {
                 body.className = "bg-amber-50 text-slate-900 min-h-screen flex flex-col";
-                headerContainer.className = "header-fixed-notch header-light w-full px-4 md:px-8 shadow-md";
-                appLogoBox.className = "w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-white shrink-0";
-                appFocusTag.className = "text-xs font-extrabold uppercase tracking-wider text-amber-700";
-                todayBar.className = "h-1 w-8 bg-amber-500 rounded-full shrink-0";
-                todayTitleText.className = "text-sm font-bold uppercase tracking-widest text-amber-800";
-                dateCalendarIcon.className = "text-amber-600 w-5 h-5 shrink-0";
+                headerContainer.className = "header-fixed-notch header-light-pop w-full px-4 md:px-8";
+                appLogoBox.className = "w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-amber-300 shrink-0 font-black border border-white/40";
+                appFocusTag.className = "text-xs font-black uppercase tracking-wider text-slate-950";
+                todayBar.className = "h-1.5 w-8 bg-rose-600 rounded-full shrink-0";
+                todayTitleText.className = "text-sm font-black uppercase tracking-widest text-rose-700";
+                dateCalendarIcon.className = "text-amber-700 w-5 h-5 shrink-0";
 
-                btn.className = "p-2 rounded-full bg-white text-amber-600 shadow-sm shrink-0 border border-amber-200";
-                refresh.className = "p-2 rounded-full bg-white text-amber-700 shadow-sm shrink-0 border border-amber-200";
-                alarmBtn.className = "p-2 rounded-full bg-white text-amber-700 shadow-sm relative shrink-0 border border-amber-200";
-                weatherBtn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-amber-300 text-xs font-semibold hover:bg-amber-100 transition-colors text-slate-800 shadow-sm";
-                btn.innerHTML = '<i data-lucide="moon" class="w-5 h-5"></i>';
+                btn.className = "p-2.5 rounded-2xl bg-white/60 text-rose-700 shadow-md shrink-0 border border-amber-300";
+                refresh.className = "p-2.5 rounded-2xl bg-white/60 text-slate-900 shadow-md shrink-0 border border-amber-300";
+                alarmBtn.className = "p-2.5 rounded-2xl bg-white/60 text-slate-900 shadow-md relative shrink-0 border border-amber-300";
+                weatherBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/70 border border-amber-300 text-xs font-bold hover:bg-white transition-colors text-slate-900 shadow-md";
+                btn.innerHTML = '<i data-lucide="moon" class="w-4 h-4"></i>';
             }
             lucide.createIcons();
             renderAll();
@@ -702,43 +722,42 @@
             container.innerHTML = "";
 
             if (list.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-slate-400 text-sm italic">Nessun elemento sincronizzato.<br>Scrivi sotto per aggiungerne uno visibile a tutti!</div>`;
+                container.innerHTML = `<div class="p-6 text-center text-indigo-300 text-sm italic font-medium">Nessun elemento sincronizzato.<br>Scrivi sotto per aggiungerne uno visibile a tutti!</div>`;
                 return;
             }
 
             list.forEach((item) => {
                 const isCompleted = item.completed || false;
-                const daysBadge = item.daysAgo !== undefined ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold shrink-0">${item.daysAgo}g</span>` : '';
+                const daysBadge = item.daysAgo !== undefined ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-black shrink-0">${item.daysAgo}g</span>` : '';
                 
                 if (currentListType === "notes") {
                     container.innerHTML += `
-                        <div class="flex items-center justify-between p-3 rounded-xl ${isDark ? 'bg-slate-800/60' : 'bg-amber-100/70 border border-amber-200'} gap-2">
+                        <div class="flex items-center justify-between p-3 rounded-2xl bg-black/30 border border-white/10 gap-2">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
                                 <i data-lucide="sticky-note" class="w-5 h-5 text-amber-400 shrink-0"></i>
-                                <span class="text-sm truncate">${esc(item.text)}</span>
+                                <span class="text-sm font-medium text-white truncate">${esc(item.text)}</span>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 ${daysBadge}
-                                <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors" title="Elimina">
+                                <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-400 hover:text-rose-400 p-1 transition-colors" title="Elimina">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         </div>`;
                 } else {
                     const iconName = isCompleted ? "check-circle" : "circle";
-                    const iconColor = isCompleted ? "text-emerald-500" : (isDark ? "text-indigo-400 hover:text-emerald-400" : "text-amber-600 hover:text-emerald-600");
-                    const textStyle = isCompleted ? "line-through opacity-50" : "";
-                    const cardBgStyle = isDark ? 'bg-slate-800/60' : 'bg-amber-100/70 border border-amber-200';
+                    const iconColor = isCompleted ? "text-emerald-400" : "text-amber-400 hover:text-emerald-400";
+                    const textStyle = isCompleted ? "line-through opacity-50" : "text-white";
 
                     container.innerHTML += `
-                        <div class="flex items-center justify-between p-3 rounded-xl ${cardBgStyle} gap-2">
+                        <div class="flex items-center justify-between p-3 rounded-2xl bg-black/30 border border-white/10 gap-2">
                             <div class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer" onclick="toggleItemComplete('${item.id}', ${!isCompleted})">
                                 <i data-lucide="${iconName}" class="w-5 h-5 ${iconColor} shrink-0 transition-colors"></i>
-                                <span class="text-sm truncate ${textStyle}">${esc(item.text)}</span>
+                                <span class="text-sm font-medium truncate ${textStyle}">${esc(item.text)}</span>
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 ${daysBadge}
-                                <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors" title="Elimina">
+                                <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-400 hover:text-rose-400 p-1 transition-colors" title="Elimina">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </div>
@@ -843,7 +862,7 @@
         function renderStatus() {
             const card = document.getElementById("statusCard");
             const line = document.getElementById("statusLine");
-            const box = isDark ? "bg-[#25284d] border-[#3a3f7a]" : "bg-white border-amber-200";
+            const box = isDark ? "bg-[#1e1b4b] border-indigo-500/40" : "bg-white border-amber-300";
             line.classList.add("hidden");
             card.classList.add("hidden");
             card.innerHTML = "";
@@ -851,9 +870,9 @@
             if (loadState === "error") {
                 card.className = `p-5 rounded-3xl border-2 ${box}`;
                 card.innerHTML = `
-                    <p class="font-bold text-lg mb-1">Non riesco a leggere il calendario</p>
-                    <p class="text-sm opacity-70 mb-3">Controlla la connessione e riprova.</p>
-                    <button onclick="loadWeek()" class="px-4 py-2 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-500 transition-all">Riprova</button>`;
+                    <p class="font-black text-lg mb-1 text-rose-400">Non riesco a leggere il calendario</p>
+                    <p class="text-sm opacity-70 mb-3 font-medium">Controlla la connessione e riprova.</p>
+                    <button onclick="loadWeek()" class="px-4 py-2 bg-gradient-to-r from-amber-400 to-rose-500 text-slate-950 rounded-2xl font-black shadow-lg">Riprova</button>`;
                 card.classList.remove("hidden");
             } else if (loadState === "stale" && weekData) {
                 line.textContent = `Senza connessione: mostro i dati delle ${romeTime(weekData.generatedAt)}.`;
@@ -871,7 +890,7 @@
 
             if (!weekData) {
                 if (loadState === "loading") {
-                    todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic">Carico il calendario…</div>';
+                    todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic font-semibold">Carico il calendario…</div>';
                 }
                 lucide.createIcons();
                 return;
@@ -886,40 +905,40 @@
                 todayData.events.forEach((e, index) => {
                     const isPast = !e.allDay && e.startMs < nowMs;
                     const timeLabel = e.allDay
-                        ? '<div class="text-indigo-400 font-bold text-sm w-16 leading-tight shrink-0">Tutto il giorno</div>'
-                        : `<div class="${isDark ? 'text-indigo-400' : 'text-amber-700'} font-bold text-lg w-16 shrink-0">${esc(e.time)}</div>`;
-                    const where = e.location ? `<p class="text-xs opacity-60 truncate">${esc(e.location)}</p>` : "";
+                        ? '<div class="text-amber-400 font-black text-sm w-16 leading-tight shrink-0">Tutto il giorno</div>'
+                        : `<div class="text-amber-400 font-black text-lg w-16 shrink-0">${esc(e.time)}</div>`;
+                    const where = e.location ? `<p class="text-xs opacity-60 truncate font-medium">${esc(e.location)}</p>` : "";
 
                     if (!isDark && index === 0) {
                         todayList.innerHTML += `
-                            <div class="p-6 rounded-3xl border-2 bg-gradient-to-br from-amber-300 via-yellow-300 to-amber-400 border-amber-500 shadow-xl space-y-3 w-full text-slate-900">
+                            <div class="p-6 rounded-3xl border-2 bg-gradient-to-br from-amber-300 via-orange-400 to-rose-500 border-rose-500 shadow-xl space-y-3 w-full text-slate-950">
                                 <div class="flex justify-between items-center">
-                                    <span class="px-3 py-1 bg-slate-900 text-amber-300 rounded-full text-xs font-extrabold uppercase tracking-wider">🔥 Fai subito questo</span>
-                                    <span class="text-xs font-bold text-slate-800">${e.allDay ? 'Tutto il giorno' : esc(e.time)}</span>
+                                    <span class="px-3 py-1 bg-slate-950 text-amber-300 rounded-full text-xs font-black uppercase tracking-wider">🔥 Fai subito questo</span>
+                                    <span class="text-xs font-black text-slate-950">${e.allDay ? 'Tutto il giorno' : esc(e.time)}</span>
                                 </div>
                                 <h3 class="text-2xl font-black tracking-tight">${esc(e.title)}</h3>
-                                ${where ? `<p class="text-xs opacity-80">${where}</p>` : ''}
+                                ${where ? `<p class="text-xs opacity-90 font-medium">${where}</p>` : ''}
                             </div>`;
                     } else {
                         const cardStyle = isDark 
-                            ? "bg-[#25284d] border-[#3a3f7a]" 
-                            : "bg-white border-amber-200 shadow-sm";
+                            ? "bg-[#25284d] border-indigo-500/30" 
+                            : "bg-white border-amber-300 shadow-sm";
 
                         todayList.innerHTML += `
                             <div class="flex items-center gap-4 p-4 rounded-3xl border-2 ${cardStyle} shadow-md w-full">
                                 ${timeLabel}
                                 <div class="flex-1 min-w-0">
-                                    <p class="font-semibold text-lg truncate">${esc(e.title)}</p>
+                                    <p class="font-bold text-lg truncate text-white">${esc(e.title)}</p>
                                     ${where}
                                 </div>
-                                <button class="${isPast ? "text-emerald-500" : "text-slate-500"} transition-colors shrink-0">
+                                <button class="${isPast ? "text-emerald-400" : "text-slate-400"} transition-colors shrink-0">
                                     <i data-lucide="${isPast ? "check-circle" : "circle"}" class="w-7 h-7"></i>
                                 </button>
                             </div>`;
                     }
                 });
             } else {
-                todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic">Nessun appuntamento per oggi. Relax! ✨</div>';
+                todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic font-semibold">Nessun appuntamento per oggi. Relax! ✨</div>';
             }
 
             const nextDays = days.filter(d => d.date !== today);
@@ -945,49 +964,49 @@
                 if (dayWeather) {
                     const wDetails = getWeatherDetails(dayWeather.code, 1);
                     const tempDisplay = (dayWeather.min !== null && dayWeather.max !== null) 
-                        ? `<span class="opacity-60 ml-auto shrink-0">${dayWeather.min}° / ${dayWeather.max}°</span>` 
+                        ? `<span class="font-bold text-amber-300 ml-auto shrink-0">${dayWeather.min}° / ${dayWeather.max}°</span>` 
                         : '';
                     
                     weatherHtml = `
-                        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl ${isDark ? 'bg-slate-800/50 border-slate-700/40 text-slate-200' : 'bg-amber-100/60 border-amber-200 text-slate-800'} border text-xs font-semibold">
-                            <i data-lucide="${wDetails.iconName}" class="w-3.5 h-3.5 ${wDetails.iconColor} shrink-0"></i>
+                        <div class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-black/30 border border-white/10 text-xs font-bold text-white">
+                            <i data-lucide="${wDetails.iconName}" class="w-4 h-4 ${wDetails.iconColor} shrink-0"></i>
                             <span class="truncate">${wDetails.label}</span>
                             ${tempDisplay}
                         </div>`;
                 }
 
-                const cardBg = isDark ? "bg-[#25284d] border-[#3a3f7a]" : "bg-white border-amber-200 shadow-sm";
+                const cardBg = isDark ? "bg-[#25284d] border-indigo-500/30" : "bg-white border-amber-300 shadow-sm";
 
                 const eventsHtml = count > 0
                     ? day.events.map(e => `
-                        <div class="group flex items-center gap-3 p-3 rounded-2xl transition-all ${isDark ? "hover:bg-slate-700/50" : "hover:bg-amber-50"}">
-                            <i data-lucide="circle" class="w-5 h-5 ${isDark ? 'text-indigo-400' : 'text-amber-600'} shrink-0"></i>
+                        <div class="group flex items-center gap-3 p-3 rounded-2xl transition-all ${isDark ? "hover:bg-indigo-950/50" : "hover:bg-amber-50"}">
+                            <i data-lucide="circle" class="w-4 h-4 text-amber-400 shrink-0"></i>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold truncate">${esc(e.title)}</p>
-                                <p class="text-xs opacity-60 truncate">${e.allDay ? "Tutto il giorno" : esc(e.time)}</p>
+                                <p class="text-sm font-bold text-white truncate">${esc(e.title)}</p>
+                                <p class="text-xs opacity-60 truncate font-medium">${e.allDay ? "Tutto il giorno" : esc(e.time)}</p>
                             </div>
                         </div>`).join("")
-                    : '<div class="py-4 text-center opacity-40 italic text-sm">Giornata libera ✨</div>';
+                    : '<div class="py-3 text-center opacity-40 italic text-xs font-semibold">Giornata libera ✨</div>';
 
                 grid.innerHTML += `
-                    <div class="p-5 rounded-3xl border transition-all card-pop ${cardBg} space-y-4 w-full">
+                    <div class="p-5 rounded-3xl border transition-all card-pop ${cardBg} space-y-4 w-full shadow-lg">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-bold shadow-lg ${badgeColors[i % badgeColors.length]} shrink-0">
-                                    <span class="text-xs uppercase leading-none">${esc(dayName)}</span>
+                                <div class="w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-black shadow-lg ${badgeColors[i % badgeColors.length]} shrink-0">
+                                    <span class="text-[10px] uppercase leading-none opacity-90">${esc(dayName)}</span>
                                     <span class="text-lg leading-none">${dayNum}</span>
                                 </div>
                                 <div class="min-w-0">
-                                    <h4 class="font-bold text-lg capitalize truncate">${esc(fullDayName)}</h4>
-                                    <span class="text-xs opacity-60 truncate block">${relLabel} • ${countLabel}</span>
+                                    <h4 class="font-black text-lg capitalize truncate text-white">${esc(fullDayName)}</h4>
+                                    <span class="text-xs opacity-70 truncate block font-semibold">${relLabel} • ${countLabel}</span>
                                 </div>
                             </div>
-                            <button onclick="openAddEventModal('${day.date}')" class="p-2 rounded-xl ${isDark ? 'bg-slate-800/80 hover:bg-slate-700 text-indigo-400' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'} transition-colors shrink-0 shadow-sm" title="Aggiungi impegno in questo giorno">
+                            <button onclick="openAddEventModal('${day.date}')" class="p-2.5 rounded-2xl bg-gradient-to-br from-amber-400 to-rose-500 text-slate-950 hover:opacity-90 transition-all shrink-0 shadow-md font-bold" title="Aggiungi impegno in questo giorno">
                                 <i data-lucide="plus" class="w-4 h-4"></i>
                             </button>
                         </div>
                         ${weatherHtml}
-                        <div class="space-y-3">${eventsHtml}</div>
+                        <div class="space-y-2">${eventsHtml}</div>
                     </div>`;
             });
 
