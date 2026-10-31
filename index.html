@@ -228,7 +228,7 @@
         const REFRESH_MS = 5 * 60 * 1000;
         const TICK_MS = 60 * 1000;
 
-        let isDark = true; // Di default notte (scura)
+        let isDark = true;
         let weekData = null;
         let sharedLists = { todo: [], shopping: [], notes: [] };
         let weatherForecast = {};
@@ -537,7 +537,6 @@
                 now.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: TZ });
         }
 
-        /* ───────── Gestione Tema Dinamico (Notte vs Giorno Pop Style) ───────── */
         function toggleTheme() {
             isDark = !isDark;
             const body = document.getElementById("bodyRoot");
@@ -553,7 +552,6 @@
             const dateCalendarIcon = document.getElementById("dateCalendarIcon");
 
             if (isDark) {
-                // Stile Notturno (Inalterato e pulito)
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
                 headerStrip.className = "header-safe-strip w-full sticky top-0 z-40 shadow-lg";
                 appLogoBox.className = "w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0";
@@ -568,7 +566,6 @@
                 weatherBtn.className = "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-semibold hover:bg-slate-700 transition-colors text-slate-200";
                 btn.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
             } else {
-                // Stile Giorno "Pop Style" (Ispirato all'immagine)
                 body.className = "bg-amber-50 text-slate-900 min-h-screen flex flex-col";
                 headerStrip.className = "header-safe-strip-light w-full sticky top-0 z-40 shadow-md";
                 appLogoBox.className = "w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-white shrink-0";
@@ -627,6 +624,7 @@
 
             list.forEach((item) => {
                 const isCompleted = item.completed || false;
+                const daysBadge = item.daysAgo !== undefined ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold shrink-0">${item.daysAgo}g</span>` : '';
                 
                 if (currentListType === "notes") {
                     container.innerHTML += `
@@ -635,9 +633,12 @@
                                 <i data-lucide="sticky-note" class="w-5 h-5 text-amber-400 shrink-0"></i>
                                 <span class="text-sm truncate">${esc(item.text)}</span>
                             </div>
-                            <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors shrink-0" title="Elimina">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
+                            <div class="flex items-center gap-2 shrink-0">
+                                ${daysBadge}
+                                <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors" title="Elimina">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>`;
                 } else {
                     const iconName = isCompleted ? "check-circle" : "circle";
@@ -651,9 +652,12 @@
                                 <i data-lucide="${iconName}" class="w-5 h-5 ${iconColor} shrink-0 transition-colors"></i>
                                 <span class="text-sm truncate ${textStyle}">${esc(item.text)}</span>
                             </div>
-                            <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors shrink-0" title="Elimina">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
+                            <div class="flex items-center gap-2 shrink-0">
+                                ${daysBadge}
+                                <button onclick="deleteItemFromCloud('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition-colors" title="Elimina">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>`;
                 }
             });
@@ -715,7 +719,7 @@
         function readCache() {
             try {
                 const data = JSON.parse(localStorage.getItem(CACHE_KEY) || "null");
-                if (data && data.days) return data; // Carica la cache storica completa
+                if (data && data.days) return data;
             } catch (e) {}
             return null;
         }
@@ -794,7 +798,6 @@
             const days = weekData.days;
             const todayData = days.find(d => d.date === today) || { events: [] };
 
-            // Render Eventi di Oggi (Con stile Pop se in modalità giorno)
             if (todayData.events.length > 0) {
                 todayData.events.forEach((e, index) => {
                     const isPast = !e.allDay && e.startMs < nowMs;
@@ -803,7 +806,6 @@
                         : `<div class="${isDark ? 'text-indigo-400' : 'text-amber-700'} font-bold text-lg w-16 shrink-0">${esc(e.time)}</div>`;
                     const where = e.location ? `<p class="text-xs opacity-60 truncate">${esc(e.location)}</p>` : "";
 
-                    // Se è giorno e siamo sul primo impegno, stile "Card Pop in evidenza" (ispirato all'immagine)
                     if (!isDark && index === 0) {
                         todayList.innerHTML += `
                             <div class="p-6 rounded-3xl border-2 bg-gradient-to-br from-amber-300 via-yellow-300 to-amber-400 border-amber-500 shadow-xl space-y-3 w-full text-slate-900">
@@ -836,7 +838,6 @@
                 todayList.innerHTML = '<div class="p-8 text-center opacity-40 italic">Nessun appuntamento per oggi. Relax! ✨</div>';
             }
 
-            // Griglia Prossimi Giorni (mantiene lo storico settimanale completo)
             const nextDays = days.filter(d => d.date !== today);
 
             nextDays.forEach((day, i) => {
