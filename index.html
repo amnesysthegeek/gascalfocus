@@ -26,16 +26,25 @@
         }
         *, *:before, *:after { box-sizing: border-box; }
         
-        /* Struttura della barra superiore con isolamento totale dal notch e dalla sfocatura */
-        .header-fixed-notch {
+        /* 1. Fascia Superiore dietro la Dynamic Island e l'orario di sistema (Punto 3) */
+        .top-system-band {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
+            height: env(safe-area-inset-top, 48px);
+            z-index: 55;
+            transition: background 0.3s ease;
+        }
+
+        /* 2. Barra App con nome e menu, posizionata subito sotto la fascia (Punto 2) */
+        .app-main-bar {
+            position: fixed;
+            top: env(safe-area-inset-top, 48px);
+            left: 0;
+            right: 0;
             z-index: 50;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding-top: max(env(safe-area-inset-top, 52px), 48px);
+            padding-top: 10px;
             padding-bottom: 12px;
             transition: all 0.3s ease;
         }
@@ -52,18 +61,30 @@
             box-shadow: 0 12px 35px -10px rgba(251, 146, 60, 0.5);
         }
 
-        /* Spaziatore robusto per abbassare tutti i contenuti ed evitare coperture */
+        /* Spaziatore generale dei contenuti sotto le barre fisse */
         .content-spacer {
-            height: calc(max(env(safe-area-inset-top, 52px), 48px) + 78px);
+            height: calc(env(safe-area-inset-top, 48px) + 68px);
         }
 
-        /* Sicurezza assoluta per i menu a tendina: bloccati dentro i margini dello schermo */
+        /* Sicurezza assoluta per i menu a tendina (Punto 1 corretto) */
         .dropdown-container {
+            position: absolute;
+            left: 0;
+            top: calc(100% + 8px);
+            width: 280px;
+            max-width: calc(100vw - 24px);
+            max-height: 60vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            z-index: 100;
+        }
+
+        .dropdown-container-right {
             position: absolute;
             right: 0;
             top: calc(100% + 8px);
-            width: 280px;
-            max-width: calc(100vw - 32px);
+            width: 260px;
+            max-width: calc(100vw - 24px);
             max-height: 60vh;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
@@ -80,8 +101,11 @@
 </head>
 <body id="bodyRoot" class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <!-- Barra Superiore Fissa con Margini Interni Controllati -->
-    <div id="headerContainer" class="header-fixed-notch header-dark-pop w-full px-3 md:px-6">
+    <!-- Fascia Superiore dietro la Dynamic Island e l'ora -->
+    <div id="topBand" class="top-system-band header-dark-pop"></div>
+
+    <!-- Barra App con nome e menu, posizionata subito sotto la fascia -->
+    <div id="headerContainer" class="app-main-bar header-dark-pop w-full px-3 md:px-6">
         <div class="max-w-4xl mx-auto flex justify-between items-center gap-1.5 w-full">
             <div class="flex items-center gap-2 shrink-0 min-w-0">
                 <div id="appLogoBox" class="w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-lg border border-white/20">
@@ -98,7 +122,7 @@
                         <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" id="weatherIcon"></i>
                         <span id="weatherTemp" class="text-white font-black text-xs">--°C</span>
                     </button>
-                    <!-- Menu Previsioni Meteo a 10 Giorni -->
+                    <!-- Menu Previsioni Meteo a 10 Giorni (Riquadrato e bloccato dentro lo schermo) -->
                     <div id="weatherMenu" class="hidden dropdown-container rounded-3xl p-3.5 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-2.5 backdrop-blur-xl">
                         <div class="border-b border-white/10 pb-2 flex justify-between items-center sticky top-0 bg-[#1e1b4b] z-10">
                             <div class="min-w-0 pr-2">
@@ -114,7 +138,7 @@
                 </div>
             </div>
 
-            <!-- Gruppo Pulsanti (Destra, perfettamente contenuti nei margini) -->
+            <!-- Gruppo Pulsanti (Destra) -->
             <div class="flex items-center gap-1.5 shrink-0">
                 <button id="themeToggle" aria-label="Cambia tema" class="p-2 rounded-2xl bg-black/30 border border-white/15 text-amber-300 hover:bg-black/50 transition-colors shrink-0 shadow-md">
                     <i data-lucide="sun" class="w-4 h-4"></i>
@@ -130,7 +154,7 @@
                         <i data-lucide="bell" class="w-4 h-4" id="bellIcon"></i>
                         <span id="alarmBadge" class="hidden absolute top-0 right-0 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-indigo-950"></span>
                     </button>
-                    <div id="alarmMenu" class="hidden dropdown-container rounded-3xl p-3.5 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-2.5 backdrop-blur-xl">
+                    <div id="alarmMenu" class="hidden dropdown-container-right rounded-3xl p-3.5 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-2.5 backdrop-blur-xl">
                         <div class="font-bold border-b border-white/10 pb-2 flex justify-between items-center text-amber-300">
                             <span>Promemoria & Avvisi</span>
                             <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -156,14 +180,14 @@
                     </div>
                 </div>
 
-                <!-- Menu Liste (Riquadrato e sicuro) -->
+                <!-- Menu Liste -->
                 <div class="relative shrink-0">
                     <button id="listBtn" onclick="toggleMenu()" class="flex items-center gap-1 px-2.5 py-2 rounded-2xl font-bold transition-all bg-black/30 border border-white/15 text-white hover:bg-black/50 text-xs shadow-md">
                         <i data-lucide="list-todo" class="w-3.5 h-3.5 shrink-0 text-amber-300"></i>
                         <span id="listLabel" class="hidden sm:inline">Liste</span>
                         <i data-lucide="chevron-right" class="w-3.5 h-3.5 transition-transform shrink-0" id="chevron"></i>
                     </button>
-                    <div id="listMenu" class="hidden dropdown-container rounded-3xl p-2 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 backdrop-blur-xl">
+                    <div id="listMenu" class="hidden dropdown-container-right rounded-3xl p-2 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 backdrop-blur-xl">
                         <button onclick="openList('todo')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium text-xs">
                             <i data-lucide="list-todo" class="w-4 h-4 text-indigo-400 shrink-0"></i> Cose da fare
                         </button>
@@ -658,6 +682,7 @@
         function toggleTheme() {
             isDark = !isDark;
             const body = document.getElementById("bodyRoot");
+            const topBand = document.getElementById("topBand");
             const headerContainer = document.getElementById("headerContainer");
             const btn = document.getElementById("themeToggle");
             const refresh = document.getElementById("refreshBtn");
@@ -671,7 +696,8 @@
 
             if (isDark) {
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
-                headerContainer.className = "header-fixed-notch header-dark-pop w-full px-3 md:px-6";
+                topBand.className = "top-system-band header-dark-pop";
+                headerContainer.className = "app-main-bar header-dark-pop w-full px-3 md:px-6";
                 appLogoBox.className = "w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-lg border border-white/20";
                 appFocusTag.className = "text-[10px] font-black uppercase tracking-wider text-amber-300 drop-shadow";
                 todayBar.className = "h-1.5 w-8 bg-amber-400 rounded-full shrink-0";
@@ -685,7 +711,8 @@
                 btn.innerHTML = '<i data-lucide="sun" class="w-4 h-4"></i>';
             } else {
                 body.className = "bg-amber-50 text-slate-900 min-h-screen flex flex-col";
-                headerContainer.className = "header-fixed-notch header-light-pop w-full px-3 md:px-6";
+                topBand.className = "top-system-band header-light-pop";
+                headerContainer.className = "app-main-bar header-light-pop w-full px-3 md:px-6";
                 appLogoBox.className = "w-9 h-9 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-amber-300 shrink-0 font-black border border-white/40";
                 appFocusTag.className = "text-[10px] font-black uppercase tracking-wider text-slate-950";
                 todayBar.className = "h-1.5 w-8 bg-rose-600 rounded-full shrink-0";
