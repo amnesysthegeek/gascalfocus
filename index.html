@@ -26,7 +26,7 @@
         }
         *, *:before, *:after { box-sizing: border-box; }
         
-   /* Barra superiore fissa in stile vetro */
+        /* Barra superiore fissa con gestione corretta della Safe Area e Notch */
         .header-fixed-notch {
             position: fixed;
             top: 0;
@@ -39,17 +39,17 @@
             transition: background 0.3s, border-color 0.3s;
         }
         .header-dark {
-            background: rgba(26, 28, 46, 0.88);
+            background: rgba(26, 28, 46, 0.9);
             border-bottom: 1px solid rgba(165, 180, 252, 0.15);
         }
         .header-light {
-            background: rgba(254, 240, 138, 0.88);
+            background: rgba(254, 240, 138, 0.9);
             border-bottom: 1px solid rgba(234, 179, 8, 0.25);
         }
 
-        /* Spaziatore dinamico per abbassare l'app e distanziarla dal notch */
+        /* Spaziatore dinamico per impedire la sovrapposizione dei contenuti sotto la barra fissa */
         .content-spacer {
-            height: calc(max(env(safe-area-inset-top, 24px), 16px) + 64px);
+            height: calc(max(env(safe-area-inset-top, 24px), 16px) + 58px);
         }
 
         .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px); }
@@ -62,7 +62,7 @@
 </head>
 <body id="bodyRoot" class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <!-- Barra Superiore Fissa (Ancorata al notch, i contenuti scorrono sotto) -->
+    <!-- Barra Superiore Fissa (Ancorata sopra il notch, i contenuti scorrono sotto) -->
     <div id="headerContainer" class="header-fixed-notch header-dark w-full px-4 md:px-8 pb-3 shadow-lg">
         <div class="max-w-4xl mx-auto flex justify-between items-center gap-2 w-full">
             <div class="flex items-center gap-2.5 shrink-0 min-w-0">
@@ -162,10 +162,10 @@
         </div>
     </div>
 
-    <!-- Spaziatore per non far finire il contenuto sotto la barra fissa del notch -->
+    <!-- Spaziatore dinamico -->
     <div class="content-spacer"></div>
 
-    <!-- Contenuto Principale Scorrevole -->
+    <!-- Contenuto Principale Scorrevole sotto la barra -->
     <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full overflow-x-hidden space-y-8">
         <div class="space-y-4">
             <h2 id="greeting" class="text-4xl md:text-6xl font-extrabold tracking-tight break-words">Caricamento...</h2>
