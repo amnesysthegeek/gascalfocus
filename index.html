@@ -26,42 +26,48 @@
         }
         *, *:before, *:after { box-sizing: border-box; }
         
-        /* Barra Superiore Stile Dynamic Island ribassata per evitare il notch/sfocatura */
+        /* Struttura della barra superiore con isolamento totale dal notch e dalla sfocatura */
         .header-fixed-notch {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 50;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding-top: max(env(safe-area-inset-top, 50px), 48px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding-top: max(env(safe-area-inset-top, 52px), 48px);
             padding-bottom: 12px;
             transition: all 0.3s ease;
         }
 
         .header-dark-pop {
-            background: linear-gradient(135deg, rgba(30, 27, 75, 0.96) 0%, rgba(76, 29, 149, 0.92) 45%, rgba(15, 23, 42, 0.96) 100%);
-            border-bottom: 2px solid rgba(244, 63, 94, 0.4);
-            box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.5);
+            background: linear-gradient(135deg, rgba(24, 24, 43, 0.98) 0%, rgba(67, 24, 133, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
+            border-bottom: 2px solid rgba(244, 63, 94, 0.45);
+            box-shadow: 0 12px 35px -10px rgba(124, 58, 237, 0.6);
         }
 
         .header-light-pop {
-            background: linear-gradient(135deg, rgba(254, 240, 138, 0.96) 0%, rgba(251, 146, 60, 0.92) 50%, rgba(244, 63, 94, 0.92) 100%);
-            border-bottom: 2px solid rgba(234, 179, 8, 0.5);
-            box-shadow: 0 10px 30px -10px rgba(251, 146, 60, 0.4);
+            background: linear-gradient(135deg, rgba(254, 240, 138, 0.98) 0%, rgba(251, 146, 60, 0.95) 50%, rgba(244, 63, 94, 0.95) 100%);
+            border-bottom: 2px solid rgba(234, 179, 8, 0.6);
+            box-shadow: 0 12px 35px -10px rgba(251, 146, 60, 0.5);
         }
 
-        /* Spaziatore dinamico per far scorrere i contenuti perfettamente sotto */
+        /* Spaziatore robusto per abbassare tutti i contenuti ed evitare coperture */
         .content-spacer {
-            height: calc(max(env(safe-area-inset-top, 50px), 48px) + 76px);
+            height: calc(max(env(safe-area-inset-top, 52px), 48px) + 78px);
         }
 
-        /* Regole di sicurezza per impedire ai menu a tendina di uscire dallo schermo */
-        .dropdown-safe {
-            max-height: 65vh;
+        /* Sicurezza assoluta per i menu a tendina: bloccati dentro i margini dello schermo */
+        .dropdown-container {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            width: 280px;
+            max-width: calc(100vw - 32px);
+            max-height: 60vh;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            z-index: 100;
         }
 
         .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px); }
@@ -74,64 +80,64 @@
 </head>
 <body id="bodyRoot" class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <!-- Barra Superiore Dynamic Island Fissa -->
-    <div id="headerContainer" class="header-fixed-notch header-dark-pop w-full px-4 md:px-8">
-        <div class="max-w-4xl mx-auto flex justify-between items-center gap-2 w-full">
-            <div class="flex items-center gap-2.5 shrink-0 min-w-0">
-                <div id="appLogoBox" class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-xl border border-white/20">
-                    <i data-lucide="calendar" class="text-white w-5 h-5"></i>
+    <!-- Barra Superiore Fissa con Margini Interni Controllati -->
+    <div id="headerContainer" class="header-fixed-notch header-dark-pop w-full px-3 md:px-6">
+        <div class="max-w-4xl mx-auto flex justify-between items-center gap-1.5 w-full">
+            <div class="flex items-center gap-2 shrink-0 min-w-0">
+                <div id="appLogoBox" class="w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-lg border border-white/20">
+                    <i data-lucide="calendar" class="text-white w-4 h-4"></i>
                 </div>
                 <div class="flex flex-col leading-tight min-w-0">
-                    <h1 class="text-base font-black tracking-tight truncate drop-shadow">GasCalendar</h1>
-                    <span id="appFocusTag" class="text-xs font-black uppercase tracking-wider text-amber-300 drop-shadow">Focus ✨</span>
+                    <h1 class="text-sm font-black tracking-tight truncate drop-shadow">GasCalendar</h1>
+                    <span id="appFocusTag" class="text-[10px] font-black uppercase tracking-wider text-amber-300 drop-shadow">Focus ✨</span>
                 </div>
                 
-                <!-- Widget Meteo Interattivo (Funzione Dynamic Island integrata) -->
+                <!-- Widget Meteo Interattivo (Dynamic Island Widget) -->
                 <div class="relative ml-1 shrink-0">
-                    <button onclick="toggleWeatherMenu()" id="weatherBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/40 border border-white/20 text-xs font-bold hover:bg-black/60 transition-all shadow-md">
-                        <i data-lucide="cloud-sun" class="w-4 h-4 text-amber-400 shrink-0 animate-pulse" id="weatherIcon"></i>
-                        <span id="weatherTemp" class="text-white font-black">--°C</span>
+                    <button onclick="toggleWeatherMenu()" id="weatherBtn" class="flex items-center gap-1 px-2.5 py-1.5 rounded-2xl bg-black/40 border border-white/20 text-xs font-bold hover:bg-black/65 transition-all shadow-md">
+                        <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" id="weatherIcon"></i>
+                        <span id="weatherTemp" class="text-white font-black text-xs">--°C</span>
                     </button>
-                    <!-- Menu Previsioni Meteo Esteso a 10 Giorni (Riquadrato e sicuro) -->
-                    <div id="weatherMenu" class="hidden absolute left-0 mt-3 w-72 max-w-[90vw] rounded-3xl p-4 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-3 backdrop-blur-xl dropdown-safe">
-                        <div class="border-b border-white/10 pb-2.5 flex justify-between items-center sticky top-0 bg-[#1e1b4b] z-10">
+                    <!-- Menu Previsioni Meteo a 10 Giorni -->
+                    <div id="weatherMenu" class="hidden dropdown-container rounded-3xl p-3.5 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-2.5 backdrop-blur-xl">
+                        <div class="border-b border-white/10 pb-2 flex justify-between items-center sticky top-0 bg-[#1e1b4b] z-10">
                             <div class="min-w-0 pr-2">
-                                <span class="font-black text-sm block text-amber-300">Previsioni 10 Giorni ☀️</span>
-                                <span id="weatherLocationName" class="text-[10px] text-indigo-200 font-medium truncate block">Rilevamento posizione...</span>
+                                <span class="font-black text-xs block text-amber-300">Previsioni 10 Giorni ☀️</span>
+                                <span id="weatherLocationName" class="text-[9px] text-indigo-200 font-medium truncate block">Rilevamento posizione...</span>
                             </div>
-                            <i data-lucide="map-pin" class="w-4 h-4 text-rose-400 shrink-0"></i>
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400 shrink-0"></i>
                         </div>
-                        <div id="weatherForecastList" class="space-y-2 pr-1">
-                            <div class="text-center opacity-50 py-3">Caricamento previsioni meteo...</div>
+                        <div id="weatherForecastList" class="space-y-1.5 pr-0.5">
+                            <div class="text-center opacity-50 py-2">Caricamento meteo...</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Gruppo Pulsanti (Destra) -->
-            <div class="flex items-center gap-1.5 md:gap-2 shrink-0">
-                <button id="themeToggle" aria-label="Cambia tema" class="p-2.5 rounded-2xl bg-black/30 border border-white/15 text-amber-300 hover:bg-black/50 transition-colors shrink-0 shadow-md">
+            <!-- Gruppo Pulsanti (Destra, perfettamente contenuti nei margini) -->
+            <div class="flex items-center gap-1.5 shrink-0">
+                <button id="themeToggle" aria-label="Cambia tema" class="p-2 rounded-2xl bg-black/30 border border-white/15 text-amber-300 hover:bg-black/50 transition-colors shrink-0 shadow-md">
                     <i data-lucide="sun" class="w-4 h-4"></i>
                 </button>
 
-                <button id="refreshBtn" aria-label="Aggiorna" class="p-2.5 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 transition-colors shrink-0 shadow-md">
+                <button id="refreshBtn" aria-label="Aggiorna" class="p-2 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 transition-colors shrink-0 shadow-md">
                     <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                 </button>
 
                 <!-- Campanella Promemoria -->
                 <div class="relative shrink-0">
-                    <button id="alarmBtn" onclick="toggleAlarmMenu()" class="p-2.5 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 transition-colors relative shadow-md" title="Imposta Promemoria">
+                    <button id="alarmBtn" onclick="toggleAlarmMenu()" class="p-2 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 transition-colors relative shadow-md" title="Imposta Promemoria">
                         <i data-lucide="bell" class="w-4 h-4" id="bellIcon"></i>
-                        <span id="alarmBadge" class="hidden absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-indigo-950"></span>
+                        <span id="alarmBadge" class="hidden absolute top-0 right-0 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-indigo-950"></span>
                     </button>
-                    <div id="alarmMenu" class="hidden absolute right-0 mt-3 w-64 max-w-[90vw] rounded-3xl p-4 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-sm space-y-3 backdrop-blur-xl dropdown-safe">
+                    <div id="alarmMenu" class="hidden dropdown-container rounded-3xl p-3.5 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-2.5 backdrop-blur-xl">
                         <div class="font-bold border-b border-white/10 pb-2 flex justify-between items-center text-amber-300">
                             <span>Promemoria & Avvisi</span>
-                            <i data-lucide="bell-ring" class="w-4 h-4 text-amber-400"></i>
+                            <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-amber-400"></i>
                         </div>
                         <div>
-                            <label class="block text-xs opacity-70 mb-1">Anticipo avviso:</label>
-                            <select id="alarmOffset" onchange="saveAlarmSettings()" class="w-full bg-slate-900 border border-white/20 rounded-xl p-2 text-white text-xs focus:outline-none focus:border-indigo-400">
+                            <label class="block text-[10px] opacity-70 mb-1">Anticipo avviso:</label>
+                            <select id="alarmOffset" onchange="saveAlarmSettings()" class="w-full bg-slate-900 border border-white/20 rounded-xl p-1.5 text-white text-xs focus:outline-none focus:border-indigo-400">
                                 <option value="0">Esattamente all'orario</option>
                                 <option value="5">5 minuti prima</option>
                                 <option value="10" selected>10 minuti prima</option>
@@ -140,34 +146,34 @@
                                 <option value="60">1 ora prima</option>
                             </select>
                         </div>
-                        <div class="flex items-center justify-between pt-1">
+                        <div class="flex items-center justify-between pt-0.5">
                             <span>Attiva suoni</span>
                             <input type="checkbox" id="alarmSound" checked onchange="saveAlarmSettings()" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
                         </div>
-                        <button onclick="requestNotificationPermission()" class="w-full py-2 bg-gradient-to-r from-indigo-600 to-rose-600 text-white rounded-xl text-xs font-bold shadow-lg transition-all">
+                        <button onclick="requestNotificationPermission()" class="w-full py-1.5 bg-gradient-to-r from-indigo-600 to-rose-600 text-white rounded-xl text-[11px] font-bold shadow-md transition-all">
                             Abilita Notifiche Telefono
                         </button>
                     </div>
                 </div>
 
-                <!-- Menu Liste -->
+                <!-- Menu Liste (Riquadrato e sicuro) -->
                 <div class="relative shrink-0">
-                    <button id="listBtn" onclick="toggleMenu()" class="flex items-center gap-1.5 px-3.5 py-2 md:px-4 md:py-2 rounded-2xl font-bold transition-all bg-black/30 border border-white/15 text-white hover:bg-black/50 text-sm shadow-md">
-                        <i data-lucide="list-todo" class="w-4 h-4 shrink-0 text-amber-300"></i>
+                    <button id="listBtn" onclick="toggleMenu()" class="flex items-center gap-1 px-2.5 py-2 rounded-2xl font-bold transition-all bg-black/30 border border-white/15 text-white hover:bg-black/50 text-xs shadow-md">
+                        <i data-lucide="list-todo" class="w-3.5 h-3.5 shrink-0 text-amber-300"></i>
                         <span id="listLabel" class="hidden sm:inline">Liste</span>
-                        <i data-lucide="chevron-right" class="w-4 h-4 transition-transform shrink-0" id="chevron"></i>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 transition-transform shrink-0" id="chevron"></i>
                     </button>
-                    <div id="listMenu" class="hidden absolute right-0 mt-3 w-48 max-w-[90vw] rounded-3xl p-2 z-50 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 backdrop-blur-xl dropdown-safe">
-                        <button onclick="openList('todo')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium">
+                    <div id="listMenu" class="hidden dropdown-container rounded-3xl p-2 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 backdrop-blur-xl">
+                        <button onclick="openList('todo')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium text-xs">
                             <i data-lucide="list-todo" class="w-4 h-4 text-indigo-400 shrink-0"></i> Cose da fare
                         </button>
-                        <button onclick="openList('shopping')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium">
+                        <button onclick="openList('shopping')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium text-xs">
                             <i data-lucide="shopping-cart" class="w-4 h-4 text-emerald-400 shrink-0"></i> Lista Spesa
                         </button>
-                        <button onclick="openList('notes')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium">
+                        <button onclick="openList('notes')" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-2xl transition-colors text-left hover:bg-indigo-600/30 text-white font-medium text-xs">
                             <i data-lucide="sticky-note" class="w-4 h-4 text-amber-400 shrink-0"></i> Note Rapide
                         </button>
-                        <button onclick="toggleMenu()" class="w-full text-center mt-2 py-1.5 text-xs text-indigo-300 hover:text-white transition-colors">Chiudi</button>
+                        <button onclick="toggleMenu()" class="w-full text-center mt-1 py-1 text-[11px] text-indigo-300 hover:text-white transition-colors">Chiudi</button>
                     </div>
                 </div>
             </div>
@@ -459,7 +465,7 @@
 
             const details = getWeatherDetails(code, isDay);
             iconEl.setAttribute("data-lucide", details.iconName);
-            iconEl.className = `w-4 h-4 ${details.iconColor}`;
+            iconEl.className = `w-3.5 h-3.5 ${details.iconColor}`;
             lucide.createIcons();
         }
 
@@ -480,12 +486,12 @@
                 const tempText = (min !== null && max !== null) ? `<span class="font-black text-amber-300">${min}° / ${max}°</span>` : '';
 
                 container.innerHTML += `
-                    <div class="flex items-center justify-between p-2.5 rounded-2xl bg-black/30 border border-white/10 gap-2">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <i data-lucide="${details.iconName}" class="w-4 h-4 ${details.iconColor} shrink-0"></i>
-                            <span class="capitalize font-bold text-white truncate">${dayName}</span>
+                    <div class="flex items-center justify-between p-2 rounded-2xl bg-black/30 border border-white/10 gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <i data-lucide="${details.iconName}" class="w-3.5 h-3.5 ${details.iconColor} shrink-0"></i>
+                            <span class="capitalize font-bold text-white truncate text-xs">${dayName}</span>
                         </div>
-                        <div class="flex items-center gap-2.5 opacity-90 shrink-0 text-xs">
+                        <div class="flex items-center gap-2 opacity-90 shrink-0 text-[11px]">
                             <span class="text-indigo-200">${details.label}</span>
                             ${tempText}
                         </div>
@@ -665,31 +671,31 @@
 
             if (isDark) {
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
-                headerContainer.className = "header-fixed-notch header-dark-pop w-full px-4 md:px-8";
-                appLogoBox.className = "w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-xl border border-white/20";
-                appFocusTag.className = "text-xs font-black uppercase tracking-wider text-amber-300 drop-shadow";
+                headerContainer.className = "header-fixed-notch header-dark-pop w-full px-3 md:px-6";
+                appLogoBox.className = "w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-lg border border-white/20";
+                appFocusTag.className = "text-[10px] font-black uppercase tracking-wider text-amber-300 drop-shadow";
                 todayBar.className = "h-1.5 w-8 bg-amber-400 rounded-full shrink-0";
                 todayTitleText.className = "text-sm font-black uppercase tracking-widest text-amber-400";
                 dateCalendarIcon.className = "text-amber-400 w-5 h-5 shrink-0";
                 
-                btn.className = "p-2.5 rounded-2xl bg-black/30 border border-white/15 text-amber-300 hover:bg-black/50 shrink-0 shadow-md";
-                refresh.className = "p-2.5 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 shrink-0 shadow-md";
-                alarmBtn.className = "p-2.5 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 relative shrink-0 shadow-md";
-                weatherBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-black/40 border border-white/20 text-xs font-bold hover:bg-black/60 transition-all text-white shadow-md";
+                btn.className = "p-2 rounded-2xl bg-black/30 border border-white/15 text-amber-300 hover:bg-black/50 shrink-0 shadow-md";
+                refresh.className = "p-2 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 shrink-0 shadow-md";
+                alarmBtn.className = "p-2 rounded-2xl bg-black/30 border border-white/15 text-white hover:bg-black/50 relative shrink-0 shadow-md";
+                weatherBtn.className = "flex items-center gap-1 px-2.5 py-1.5 rounded-2xl bg-black/40 border border-white/20 text-xs font-bold hover:bg-black/65 transition-all text-white shadow-md";
                 btn.innerHTML = '<i data-lucide="sun" class="w-4 h-4"></i>';
             } else {
                 body.className = "bg-amber-50 text-slate-900 min-h-screen flex flex-col";
-                headerContainer.className = "header-fixed-notch header-light-pop w-full px-4 md:px-8";
-                appLogoBox.className = "w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-amber-300 shrink-0 font-black border border-white/40";
-                appFocusTag.className = "text-xs font-black uppercase tracking-wider text-slate-950";
+                headerContainer.className = "header-fixed-notch header-light-pop w-full px-3 md:px-6";
+                appLogoBox.className = "w-9 h-9 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-amber-300 shrink-0 font-black border border-white/40";
+                appFocusTag.className = "text-[10px] font-black uppercase tracking-wider text-slate-950";
                 todayBar.className = "h-1.5 w-8 bg-rose-600 rounded-full shrink-0";
                 todayTitleText.className = "text-sm font-black uppercase tracking-widest text-rose-700";
                 dateCalendarIcon.className = "text-amber-700 w-5 h-5 shrink-0";
 
-                btn.className = "p-2.5 rounded-2xl bg-white/60 text-rose-700 shadow-md shrink-0 border border-amber-300";
-                refresh.className = "p-2.5 rounded-2xl bg-white/60 text-slate-900 shadow-md shrink-0 border border-amber-300";
-                alarmBtn.className = "p-2.5 rounded-2xl bg-white/60 text-slate-900 shadow-md relative shrink-0 border border-amber-300";
-                weatherBtn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/70 border border-amber-300 text-xs font-bold hover:bg-white transition-colors text-slate-900 shadow-md";
+                btn.className = "p-2 rounded-2xl bg-white/60 text-rose-700 shadow-md shrink-0 border border-amber-300";
+                refresh.className = "p-2 rounded-2xl bg-white/60 text-slate-900 shadow-md shrink-0 border border-amber-300";
+                alarmBtn.className = "p-2 rounded-2xl bg-white/60 text-slate-900 shadow-md relative shrink-0 border border-amber-300";
+                weatherBtn.className = "flex items-center gap-1 px-2.5 py-1.5 rounded-2xl bg-white/70 border border-amber-300 text-xs font-bold hover:bg-white transition-colors text-slate-900 shadow-md";
                 btn.innerHTML = '<i data-lucide="moon" class="w-4 h-4"></i>';
             }
             lucide.createIcons();
