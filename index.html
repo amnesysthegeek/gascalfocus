@@ -26,7 +26,7 @@
         }
         *, *:before, *:after { box-sizing: border-box; }
         
-        /* Barra superiore fissa che copre il notch e resta immobile durante lo scroll */
+   /* Barra superiore fissa in stile vetro */
         .header-fixed-notch {
             position: fixed;
             top: 0;
@@ -35,7 +35,7 @@
             z-index: 50;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            padding-top: max(env(safe-area-inset-top, 20px), 14px);
+            padding-top: max(env(safe-area-inset-top, 24px), 16px);
             transition: background 0.3s, border-color 0.3s;
         }
         .header-dark {
@@ -47,9 +47,9 @@
             border-bottom: 1px solid rgba(234, 179, 8, 0.25);
         }
 
-        /* Spaziatore per evitare che il contenuto finisca sotto la barra fissa */
+        /* Spaziatore dinamico per abbassare l'app e distanziarla dal notch */
         .content-spacer {
-            height: max(env(safe-area-inset-top, 70px), 75px);
+            height: calc(max(env(safe-area-inset-top, 24px), 16px) + 64px);
         }
 
         .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px); }
