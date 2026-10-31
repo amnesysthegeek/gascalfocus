@@ -26,25 +26,32 @@
         }
         *, *:before, *:after { box-sizing: border-box; }
         
-        /* Barra in alto fissa (Sticky con effetto vetro che fa scorrere i contenuti sotto) */
-        .header-sticky-container {
-            position: sticky;
+        /* Barra superiore fissa che copre il notch e resta immobile durante lo scroll */
+        .header-fixed-notch {
+            position: fixed;
             top: 0;
-            z-zIndex: 50;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            left: 0;
+            right: 0;
+            z-index: 50;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            padding-top: max(env(safe-area-inset-top, 20px), 14px);
             transition: background 0.3s, border-color 0.3s;
         }
         .header-dark {
-            background: rgba(26, 28, 46, 0.85);
+            background: rgba(26, 28, 46, 0.88);
             border-bottom: 1px solid rgba(165, 180, 252, 0.15);
         }
         .header-light {
-            background: rgba(254, 240, 138, 0.85);
+            background: rgba(254, 240, 138, 0.88);
             border-bottom: 1px solid rgba(234, 179, 8, 0.25);
         }
 
-        .safe-top-padding { padding-top: max(env(safe-area-inset-top, 20px), 16px); }
+        /* Spaziatore per evitare che il contenuto finisca sotto la barra fissa */
+        .content-spacer {
+            height: max(env(safe-area-inset-top, 70px), 75px);
+        }
+
         .safe-bottom { padding-bottom: max(env(safe-area-inset-bottom, 20px), 24px); }
         .card-pop { transition: transform 0.2s ease; }
         .card-pop:active { transform: scale(0.98); }
@@ -55,8 +62,8 @@
 </head>
 <body id="bodyRoot" class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <!-- Barra in alto fissa con sfumatura vetro -->
-    <div id="headerContainer" class="header-sticky-container header-dark w-full px-4 md:px-8 safe-top-padding pb-3 shadow-lg">
+    <!-- Barra Superiore Fissa (Ancorata al notch, i contenuti scorrono sotto) -->
+    <div id="headerContainer" class="header-fixed-notch header-dark w-full px-4 md:px-8 pb-3 shadow-lg">
         <div class="max-w-4xl mx-auto flex justify-between items-center gap-2 w-full">
             <div class="flex items-center gap-2.5 shrink-0 min-w-0">
                 <div id="appLogoBox" class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
@@ -155,8 +162,11 @@
         </div>
     </div>
 
-    <!-- Contenuto Principale Scorrevole sotto la barra -->
-    <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full overflow-x-hidden space-y-8 pt-6">
+    <!-- Spaziatore per non far finire il contenuto sotto la barra fissa del notch -->
+    <div class="content-spacer"></div>
+
+    <!-- Contenuto Principale Scorrevole -->
+    <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full overflow-x-hidden space-y-8">
         <div class="space-y-4">
             <h2 id="greeting" class="text-4xl md:text-6xl font-extrabold tracking-tight break-words">Caricamento...</h2>
             <div class="flex items-center gap-2 text-lg font-medium opacity-80">
@@ -190,7 +200,6 @@
                     <div id="todayBar" class="h-1 w-8 bg-indigo-500 rounded-full shrink-0"></div>
                     <span id="todayTitleText" class="text-sm font-bold uppercase tracking-widest text-indigo-400">Appuntamenti di Oggi</span>
                 </div>
-                <!-- Pulsante rapido aggiungi per oggi -->
                 <button onclick="openAddEventModal(romeToday())" class="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 text-xs font-semibold transition-colors">
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i> Aggiungi
                 </button>
@@ -310,7 +319,6 @@
 
         function isoToDate(iso) { return new Date(iso + "T12:00:00Z"); }
 
-        /* Aggiunta Evento per Data Specifica */
         function openAddEventModal(dateIso) {
             document.getElementById("modalEventDate").value = dateIso || romeToday();
             document.getElementById("modalEventTitle").value = "";
@@ -627,7 +635,7 @@
 
             if (isDark) {
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
-                headerContainer.className = "header-sticky-container header-dark w-full px-4 md:px-8 safe-top-padding pb-3 shadow-lg";
+                headerContainer.className = "header-fixed-notch header-dark w-full px-4 md:px-8 pb-3 shadow-lg";
                 appLogoBox.className = "w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0";
                 appFocusTag.className = "text-xs font-extrabold uppercase tracking-wider text-indigo-400";
                 todayBar.className = "h-1 w-8 bg-indigo-500 rounded-full shrink-0";
@@ -641,7 +649,7 @@
                 btn.innerHTML = '<i data-lucide="sun" class="w-5 h-5"></i>';
             } else {
                 body.className = "bg-amber-50 text-slate-900 min-h-screen flex flex-col";
-                headerContainer.className = "header-sticky-container header-light w-full px-4 md:px-8 safe-top-padding pb-3 shadow-md";
+                headerContainer.className = "header-fixed-notch header-light w-full px-4 md:px-8 pb-3 shadow-md";
                 appLogoBox.className = "w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-white shrink-0";
                 appFocusTag.className = "text-xs font-extrabold uppercase tracking-wider text-amber-700";
                 todayBar.className = "h-1 w-8 bg-amber-500 rounded-full shrink-0";
@@ -972,7 +980,6 @@
                                     <span class="text-xs opacity-60 truncate block">${relLabel} • ${countLabel}</span>
                                 </div>
                             </div>
-                            <!-- Pulsante + Rapido per questo giorno specifico -->
                             <button onclick="openAddEventModal('${day.date}')" class="p-2 rounded-xl ${isDark ? 'bg-slate-800/80 hover:bg-slate-700 text-indigo-400' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'} transition-colors shrink-0 shadow-sm" title="Aggiungi impegno in questo giorno">
                                 <i data-lucide="plus" class="w-4 h-4"></i>
                             </button>
