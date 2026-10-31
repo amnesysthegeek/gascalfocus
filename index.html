@@ -23,17 +23,15 @@
             width: 100%;
             max-width: 100vw;
             box-sizing: border-box;
-            /* Rimozione barra di scorrimento laterale stile nativo */
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE e Edge */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
         html::-webkit-scrollbar, body::-webkit-scrollbar, div::-webkit-scrollbar {
-            display: none; /* Chrome, Safari e Opera */
+            display: none;
         }
 
         *, *:before, *:after { box-sizing: border-box; }
         
-        /* 1. Fascia Superiore dietro l'orario di sistema e la Dynamic Island */
         .top-system-band {
             position: fixed;
             top: 0;
@@ -44,7 +42,6 @@
             transition: background 0.3s ease;
         }
 
-        /* 2. Barra App posizionata ancora più in basso */
         .app-main-bar {
             position: fixed;
             top: calc(env(safe-area-inset-top, 48px) + 14px);
@@ -68,12 +65,10 @@
             box-shadow: 0 12px 35px -10px rgba(251, 146, 60, 0.5);
         }
 
-        /* Spaziatore generale dei contenuti sotto le barre fisse */
         .content-spacer {
             height: calc(env(safe-area-inset-top, 48px) + 78px);
         }
 
-        /* Sicurezza assoluta per i menu a tendina */
         .dropdown-container {
             position: absolute;
             left: 0;
@@ -108,7 +103,7 @@
 </head>
 <body id="bodyRoot" class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <!-- Fascia Superiore dietro l'orario e la Dynamic Island -->
+    <!-- Fascia Superiore -->
     <div id="topBand" class="top-system-band header-dark-pop"></div>
 
     <!-- Barra App con nome e menu -->
@@ -211,6 +206,28 @@
                         <button onclick="toggleMenu()" class="w-full text-center mt-1 py-1 text-[11px] text-indigo-300 hover:text-white transition-colors">Chiudi</button>
                     </div>
                 </div>
+
+                <!-- Icona Info / Copyright (Ultima a destra) -->
+                <div class="relative shrink-0">
+                    <button onclick="toggleInfoMenu()" class="p-2 rounded-2xl bg-black/30 border border-white/15 text-amber-300 hover:bg-black/50 transition-colors shadow-md" title="Informazioni & Copyright">
+                        <i data-lucide="help-circle" class="w-4 h-4"></i>
+                    </button>
+                    <!-- Menu a tendina Info -->
+                    <div id="infoMenu" class="hidden dropdown-container-right rounded-3xl p-4 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-3 backdrop-blur-xl">
+                        <div class="font-bold border-b border-white/10 pb-2 flex justify-between items-center text-amber-300">
+                            <span>Informazioni App</span>
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-amber-400"></i>
+                        </div>
+                        <div class="space-y-2 opacity-90 leading-relaxed">
+                            <p><strong class="text-white">GasCalendar Focus</strong></p>
+                            <p><span class="text-amber-300 font-semibold">Versione:</span> rel. 2.0.19</p>
+                            <p><span class="text-indigo-300 font-semibold">Designed & Created by:</span><br>Alessandro Gasparri</p>
+                            <p class="text-[11px] italic opacity-80 pt-1 border-t border-white/10">"Grazie a Sara e Matilda per sopportare i miei scleri durante la realizzazione di questa e altre app." ❤️</p>
+                        </div>
+                        <button onclick="toggleInfoMenu()" class="w-full text-center mt-1 py-1 text-[11px] text-indigo-300 hover:text-white transition-colors">Chiudi</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -605,9 +622,11 @@
             const weatherMenu = document.getElementById("weatherMenu");
             const alarmMenu = document.getElementById("alarmMenu");
             const listMenu = document.getElementById("listMenu");
+            const infoMenu = document.getElementById("infoMenu");
             const chevron = document.getElementById("chevron");
 
             if (!alarmMenu.classList.contains("hidden")) alarmMenu.classList.add("hidden");
+            if (!infoMenu.classList.contains("hidden")) infoMenu.classList.add("hidden");
             if (!listMenu.classList.contains("hidden")) {
                 listMenu.classList.add("hidden");
                 chevron.classList.remove("rotate-90");
@@ -619,9 +638,11 @@
             const alarmMenu = document.getElementById("alarmMenu");
             const weatherMenu = document.getElementById("weatherMenu");
             const listMenu = document.getElementById("listMenu");
+            const infoMenu = document.getElementById("infoMenu");
             const chevron = document.getElementById("chevron");
 
             if (!weatherMenu.classList.contains("hidden")) weatherMenu.classList.add("hidden");
+            if (!infoMenu.classList.contains("hidden")) infoMenu.classList.add("hidden");
             if (!listMenu.classList.contains("hidden")) {
                 listMenu.classList.add("hidden");
                 chevron.classList.remove("rotate-90");
@@ -636,13 +657,31 @@
             const listMenu = document.getElementById("listMenu");
             const alarmMenu = document.getElementById("alarmMenu");
             const weatherMenu = document.getElementById("weatherMenu");
+            const infoMenu = document.getElementById("infoMenu");
             const chevron = document.getElementById("chevron");
 
             if (!alarmMenu.classList.contains("hidden")) alarmMenu.classList.add("hidden");
             if (!weatherMenu.classList.contains("hidden")) weatherMenu.classList.add("hidden");
+            if (!infoMenu.classList.contains("hidden")) infoMenu.classList.add("hidden");
 
             listMenu.classList.toggle("hidden");
             chevron.classList.toggle("rotate-90");
+        }
+
+        function toggleInfoMenu() {
+            const infoMenu = document.getElementById("infoMenu");
+            const alarmMenu = document.getElementById("alarmMenu");
+            const weatherMenu = document.getElementById("weatherMenu");
+            const listMenu = document.getElementById("listMenu");
+            const chevron = document.getElementById("chevron");
+
+            if (!alarmMenu.classList.contains("hidden")) alarmMenu.classList.add("hidden");
+            if (!weatherMenu.classList.contains("hidden")) weatherMenu.classList.add("hidden");
+            if (!listMenu.classList.contains("hidden")) {
+                listMenu.classList.add("hidden");
+                chevron.classList.remove("rotate-90");
+            }
+            infoMenu.classList.toggle("hidden");
         }
 
         function saveAlarmSettings() {
