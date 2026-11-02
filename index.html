@@ -26,67 +26,52 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-    /* Forzatura assoluta Effetto Vetro (Glassmorphism) */
-    .top-system-band, 
-    .app-main-bar {
-        background: rgba(24, 24, 43, 0.65) !important;
-        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-        backdrop-filter: blur(20px) saturate(180%) !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
-    }
         html::-webkit-scrollbar, body::-webkit-scrollbar, div::-webkit-scrollbar {
             display: none;
         }
 
         *, *:before, *:after { box-sizing: border-box; }
         
-        .top-system-band {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: calc(env(safe-area-inset-top, 48px) + 14px);
-            z-index: 55;
-            transition: background 0.3s ease, backdrop-filter 0.3s ease;
-        }
-
+        /* Barra App come Isola Fluttuante Arrotondata (Floating Island) */
         .app-main-bar {
             position: fixed;
-            top: calc(env(safe-area-inset-top, 48px) + 14px);
-            left: 0;
-            right: 0;
+            top: calc(env(safe-area-inset-top, 20px) + 8px);
+            left: 14px;
+            right: 14px;
+            max-width: 800px;
+            margin: 0 auto;
             z-index: 50;
-            padding-top: 10px;
-            padding-bottom: 10px;
+            padding: 10px 14px;
+            border-radius: 28px;
             transition: all 0.3s ease;
         }
 
-        /* Effetto Vetro iOS (Frosted Glass / Glassmorphism) - Tema Scuro */
+        /* Effetto Vetro (Glassmorphism) a Isola - Tema Scuro */
         .header-dark-pop {
-            background: rgba(24, 24, 43, 0.70) !important;
+            background: rgba(24, 24, 43, 0.75) !important;
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid rgba(244, 63, 94, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.5);
         }
 
-        /* Effetto Vetro iOS (Frosted Glass / Glassmorphism) - Tema Chiaro */
+        /* Effetto Vetro (Glassmorphism) a Isola - Tema Chiaro */
         .header-light-pop {
-            background: rgba(255, 255, 255, 0.70) !important;
+            background: rgba(255, 255, 255, 0.75) !important;
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid rgba(234, 179, 8, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(251, 146, 60, 0.25);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px 0 rgba(31, 38, 135, 0.15);
         }
 
         .content-spacer {
-            height: calc(env(safe-area-inset-top, 48px) + 78px);
+            height: calc(env(safe-area-inset-top, 20px) + 80px);
         }
 
         .dropdown-container {
             position: absolute;
             left: 0;
-            top: calc(100% + 8px);
+            top: calc(100% + 10px);
             width: 280px;
             max-width: calc(100vw - 24px);
             max-height: 60vh;
@@ -98,7 +83,7 @@
         .dropdown-container-right {
             position: absolute;
             right: 0;
-            top: calc(100% + 8px);
+            top: calc(100% + 10px);
             width: 260px;
             max-width: calc(100vw - 24px);
             max-height: 60vh;
@@ -117,12 +102,9 @@
 </head>
 <body id="bodyRoot" class="bg-[#1a1c2e] text-white min-h-screen flex flex-col">
 
-    <!-- Fascia Superiore -->
-    <div id="topBand" class="top-system-band header-dark-pop"></div>
-
-    <!-- Barra App con nome e menu -->
-    <div id="headerContainer" class="app-main-bar header-dark-pop w-full px-3 md:px-6">
-        <div class="max-w-4xl mx-auto flex justify-between items-center gap-1.5 w-full">
+    <!-- Barra App Fluttuante (Isola) con nome e menu -->
+    <div id="headerContainer" class="app-main-bar header-dark-pop">
+        <div class="flex justify-between items-center gap-1.5 w-full">
             <div class="flex items-center gap-2 shrink-0 min-w-0">
                 <div id="appLogoBox" class="w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-lg border border-white/20">
                     <i data-lucide="calendar" class="text-white w-4 h-4"></i>
@@ -807,7 +789,6 @@
         function toggleTheme() {
             isDark = !isDark;
             const body = document.getElementById("bodyRoot");
-            const topBand = document.getElementById("topBand");
             const headerContainer = document.getElementById("headerContainer");
             const btn = document.getElementById("themeToggle");
             const refresh = document.getElementById("refreshBtn");
@@ -821,8 +802,7 @@
 
             if (isDark) {
                 body.className = "bg-[#1a1c2e] text-white min-h-screen flex flex-col";
-                topBand.className = "top-system-band header-dark-pop";
-                headerContainer.className = "app-main-bar header-dark-pop w-full px-3 md:px-6";
+                headerContainer.className = "app-main-bar header-dark-pop";
                 appLogoBox.className = "w-9 h-9 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/40 shrink-0 font-black text-lg border border-white/20";
                 appFocusTag.className = "text-[10px] font-black uppercase tracking-wider text-amber-300 drop-shadow";
                 todayBar.className = "h-1.5 w-8 bg-amber-400 rounded-full shrink-0";
@@ -836,8 +816,7 @@
                 btn.innerHTML = '<i data-lucide="sun" class="w-4 h-4"></i>';
             } else {
                 body.className = "bg-amber-50 text-slate-900 min-h-screen flex flex-col";
-                topBand.className = "top-system-band header-light-pop";
-                headerContainer.className = "app-main-bar header-light-pop w-full px-3 md:px-6";
+                headerContainer.className = "app-main-bar header-light-pop";
                 appLogoBox.className = "w-9 h-9 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/30 text-amber-300 shrink-0 font-black border border-white/40";
                 appFocusTag.className = "text-[10px] font-black uppercase tracking-wider text-slate-950";
                 todayBar.className = "h-1.5 w-8 bg-rose-600 rounded-full shrink-0";
