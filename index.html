@@ -26,6 +26,14 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
+    /* Forzatura assoluta Effetto Vetro (Glassmorphism) */
+    .top-system-band, 
+    .app-main-bar {
+        background: rgba(24, 24, 43, 0.65) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
         html::-webkit-scrollbar, body::-webkit-scrollbar, div::-webkit-scrollbar {
             display: none;
         }
