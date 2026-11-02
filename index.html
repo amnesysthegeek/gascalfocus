@@ -39,7 +39,7 @@
             right: 0;
             height: calc(env(safe-area-inset-top, 48px) + 14px);
             z-index: 55;
-            transition: background 0.3s ease;
+            transition: background 0.3s ease, backdrop-filter 0.3s ease;
         }
 
         .app-main-bar {
@@ -53,16 +53,22 @@
             transition: all 0.3s ease;
         }
 
+        /* Effetto Vetro iOS (Frosted Glass / Glassmorphism) - Tema Scuro */
         .header-dark-pop {
-            background: linear-gradient(135deg, rgba(24, 24, 43, 0.98) 0%, rgba(67, 24, 133, 0.95) 50%, rgba(15, 23, 42, 0.98) 100%);
-            border-bottom: 2px solid rgba(244, 63, 94, 0.45);
-            box-shadow: 0 12px 35px -10px rgba(124, 58, 237, 0.6);
+            background: rgba(24, 24, 43, 0.70) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(244, 63, 94, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
         }
 
+        /* Effetto Vetro iOS (Frosted Glass / Glassmorphism) - Tema Chiaro */
         .header-light-pop {
-            background: linear-gradient(135deg, rgba(254, 240, 138, 0.98) 0%, rgba(251, 146, 60, 0.95) 50%, rgba(244, 63, 94, 0.95) 100%);
-            border-bottom: 2px solid rgba(234, 179, 8, 0.6);
-            box-shadow: 0 12px 35px -10px rgba(251, 146, 60, 0.5);
+            background: rgba(255, 255, 255, 0.70) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(234, 179, 8, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(251, 146, 60, 0.25);
         }
 
         .content-spacer {
@@ -124,8 +130,8 @@
                         <i data-lucide="cloud-sun" class="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" id="weatherIcon"></i>
                         <span id="weatherTemp" class="text-white font-black text-xs">--°C</span>
                     </button>
-                    <!-- Menu Previsioni Meteo a 10 Giorni -->
-                    <div id="weatherMenu" class="hidden dropdown-container rounded-3xl p-3.5 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-2.5 backdrop-blur-xl">
+                    <!-- Menu Previsioni Meteo -->
+                    <div id="weatherMenu" class="hidden dropdown-container rounded-3xl p-3.5 border shadow-2xl bg-[#1e1b4b]/95 border-indigo-500/40 text-xs space-y-2.5 backdrop-blur-xl">
                         <div class="border-b border-white/10 pb-2 flex justify-between items-center sticky top-0 bg-[#1e1b4b] z-10">
                             <div class="min-w-0 pr-2">
                                 <span class="font-black text-xs block text-amber-300">Previsioni 10 Giorni ☀️</span>
@@ -156,7 +162,7 @@
                         <i data-lucide="bell" class="w-4 h-4" id="bellIcon"></i>
                         <span id="alarmBadge" class="hidden absolute top-0 right-0 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-indigo-950"></span>
                     </button>
-                    <div id="alarmMenu" class="hidden dropdown-container-right rounded-3xl p-3.5 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-2.5 backdrop-blur-xl">
+                    <div id="alarmMenu" class="hidden dropdown-container-right rounded-3xl p-3.5 border shadow-2xl bg-[#1e1b4b]/95 border-indigo-500/40 text-xs space-y-2.5 backdrop-blur-xl">
                         <div class="font-bold border-b border-white/10 pb-2 flex justify-between items-center text-amber-300">
                             <span>Promemoria & Avvisi</span>
                             <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -190,7 +196,7 @@
                         <span id="listLabel" class="hidden sm:inline">Liste</span>
                         <i data-lucide="chevron-right" class="w-3.5 h-3.5 transition-transform shrink-0" id="chevron"></i>
                     </button>
-                    <div id="listMenu" class="hidden dropdown-container-right rounded-3xl p-2 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 backdrop-blur-xl space-y-1">
+                    <div id="listMenu" class="hidden dropdown-container-right rounded-3xl p-2 border shadow-2xl bg-[#1e1b4b]/95 border-indigo-500/40 backdrop-blur-xl space-y-1">
                         <button onclick="openList('todo')" class="w-full flex items-center justify-between px-3 py-2 rounded-2xl transition-colors hover:bg-indigo-600/30 text-white font-medium text-xs">
                             <span class="flex items-center gap-2.5"><i data-lucide="list-todo" class="w-4 h-4 text-indigo-400 shrink-0"></i> Cose da fare</span>
                             <span id="badgeTodo" class="px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-200 font-bold text-[10px]">0</span>
@@ -212,8 +218,7 @@
                     <button onclick="toggleInfoMenu()" class="p-2 rounded-2xl bg-black/30 border border-white/15 text-amber-300 hover:bg-black/50 transition-colors shadow-md" title="Informazioni & Copyright">
                         <i data-lucide="help-circle" class="w-4 h-4"></i>
                     </button>
-                    <!-- Menu a tendina Info -->
-                    <div id="infoMenu" class="hidden dropdown-container-right rounded-3xl p-4 border shadow-2xl bg-[#1e1b4b] border-indigo-500/40 text-xs space-y-3 backdrop-blur-xl">
+                    <div id="infoMenu" class="hidden dropdown-container-right rounded-3xl p-4 border shadow-2xl bg-[#1e1b4b]/95 border-indigo-500/40 text-xs space-y-3 backdrop-blur-xl">
                         <div class="font-bold border-b border-white/10 pb-2 flex justify-between items-center text-amber-300">
                             <span>Informazioni App</span>
                             <i data-lucide="info" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -239,7 +244,6 @@
     <div class="flex-1 p-4 md:p-8 safe-bottom max-w-4xl mx-auto w-full overflow-x-hidden space-y-8">
         <div class="space-y-3">
             <h2 id="greeting" class="text-4xl md:text-6xl font-black tracking-tight break-words">Caricamento...</h2>
-            <!-- Commento spiritoso dinamico -->
             <p id="funnyJoke" class="text-sm md:text-base font-semibold text-amber-400 italic opacity-90"></p>
             <div class="flex items-center gap-2 text-lg font-semibold opacity-90 pt-1">
                 <i data-lucide="calendar" class="text-amber-400 w-5 h-5 shrink-0" id="dateCalendarIcon"></i>
@@ -288,7 +292,7 @@
         </div>
     </div>
 
-    <!-- Modal Aggiungi Evento (Dalle ore... Alle ore... o Tutto il giorno) -->
+    <!-- Modal Aggiungi Evento -->
     <div id="addEventModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
         <div class="w-full max-w-md rounded-3xl overflow-hidden bg-[#1e1b4b] border border-indigo-500/40 shadow-2xl p-6 space-y-4 animate-slide-up text-white">
             <div class="flex justify-between items-center border-b border-white/10 pb-3">
@@ -309,7 +313,6 @@
                     <input type="text" id="modalEventTitle" placeholder="Es. Riunione, Visita..." class="w-full bg-slate-900 border border-white/20 rounded-xl p-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 font-medium" onkeypress="if(event.key==='Enter') submitAddEventModal()">
                 </div>
                 
-                <!-- Selezione Orario: Dalle ore... Alle ore... o Tutto il giorno -->
                 <div class="space-y-2.5 pt-1 border-t border-white/10">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-semibold opacity-90">Orario specifico:</label>
@@ -320,7 +323,6 @@
                     </div>
                     
                     <div id="timeInputsContainer" class="hidden space-y-2 pt-1">
-                        <!-- Dalle ore -->
                         <div>
                             <label class="block text-[10px] text-amber-300 font-bold mb-1">⏰ Dalle ore:</label>
                             <div class="grid grid-cols-2 gap-2">
@@ -332,7 +334,6 @@
                                 </select>
                             </div>
                         </div>
-                        <!-- Alle ore -->
                         <div>
                             <label class="block text-[10px] text-rose-300 font-bold mb-1">🏁 Alle ore:</label>
                             <div class="grid grid-cols-2 gap-2">
@@ -1207,3 +1208,4 @@
     </script>
 </body>
 </html>
+
